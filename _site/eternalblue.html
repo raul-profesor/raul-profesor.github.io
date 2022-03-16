@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en" class="html" data-theme="dark"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>
+    
+      Métodos de explotación manual de EternalBlue
+    
+  </title>
+
+  <!-- Begin Jekyll SEO tag v2.7.3 -->
+<meta name="generator" content="Jekyll v4.2.0" />
+<meta property="og:title" content="Métodos de explotación manual de EternalBlue" />
+<meta name="author" content="Raúl Riesco" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Explicación teórica" />
+<meta property="og:description" content="Explicación teórica" />
+<link rel="canonical" href="https://raul-profesor.github.io/eternalblue.html" />
+<meta property="og:url" content="https://raul-profesor.github.io/eternalblue.html" />
+<meta property="og:site_name" content="Raúl Riesco" />
+<meta property="og:image" content="https://soopr.xyz/images/card?url=https://raul-profesor.github.io/eternalblue.html" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2022-03-15T00:00:00+01:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta property="og:image" content="https://soopr.xyz/images/card?url=https://raul-profesor.github.io/eternalblue.html" />
+<meta property="twitter:title" content="Métodos de explotación manual de EternalBlue" />
+<meta name="twitter:site" content="@abhinav" />
+<meta name="twitter:creator" content="@Raúl Riesco" />
+<script type="application/ld+json">
+{"url":"https://raul-profesor.github.io/eternalblue.html","description":"Explicación teórica","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://raul-profesor.github.io/eternalblue.html"},"author":{"@type":"Person","name":"Raúl Riesco"},"headline":"Métodos de explotación manual de EternalBlue","dateModified":"2022-03-15T00:00:00+01:00","datePublished":"2022-03-15T00:00:00+01:00","@context":"https://schema.org"}</script>
+<script async defer data-soopr-token="" src="https://sdk.soopr.co/soopr.js"  ></script>
+<!-- End Jekyll SEO tag -->
+
+  <link type="application/atom+xml" rel="alternate" href="https://raul-profesor.github.io/feed.xml" title="Raúl Riesco" />
+
+  <link rel="shortcut icon" type="image/x-icon" href="//logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+  
+    <script type="text/javascript">
+  window.addEventListener('load', themeChange);
+  const currentTheme = localStorage.getItem('theme') ? localStorage.getItem('theme') : null;
+  if (currentTheme)
+    document.documentElement.setAttribute('data-theme', currentTheme);
+
+  function themeChange() {
+    let button = document.querySelector('.theme-toggle');
+
+    button.addEventListener('click', function (e) {
+      let currentTheme = document.documentElement.getAttribute('data-theme');
+      if (currentTheme === 'dark') {
+        transition();
+        document.documentElement.setAttribute('data-theme', 'light');
+        localStorage.setItem('theme', 'light');
+      } else {
+        transition();
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
+      }
+    });
+
+    let transition = () => {
+      document.documentElement.classList.add('transition');
+      window.setTimeout(() => {
+        document.documentElement.classList.remove('transition');
+      }, 1000);
+    }
+  }
+</script>
+
+
+  
+</head>
+<body>
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">Página principal</a>
+<h1 class="post-title">Métodos de explotación manual de EternalBlue</h1>
+<p class="post-date text-bold text-upcase">
+  
+    <span>March 2022</span>
+  
+</p>
+
+<div class="soopr-btn"
+   data-twitter="SooprCo"
+>
+</div>
+
+<h2 id="explicación-teórica">Explicación teórica</h2>
+
+<p>En el curso de especialización de ciberseguridad <a href="https://raul-profesor.github.io/Curso-especialista-ciberseguridad/segof/servicios_desact/#un-caso-real-eternalblue-ms17-010-smbv1-y-wannacry">ya he hablado</a> de la archiconocida vulnerabilidad EternalBlue.</p>
+
+<p>También <a href="https://raul-profesor.github.io/Curso-especialista-ciberseguridad/segof/EternalBlue/">intentamos explotar</a> esta vulnerabilidad con un éxito regular, puesto que las máquinas que probé para diseñar ese ejercicio nos fue imposible explotarlas de forma manual, aunque sí con Metasploit.</p>
+
+<p>Se me quedó la espinita clavada, máxime cuando tenía documentada desde hacía un tiempo la solución de la máquina <code class="language-plaintext highlighter-rouge">Blue</code> de HTB de forma manual sin problemas, con pruebas gráficas. Por lo que sea, no volvió a funcionar <a href="https://github.com/worawit/MS17-010">de esta forma</a> ni ahí ni en THM.</p>
+
+<p>Recientemente se me dio el caso contrario; haciendo uso de Metasploit, por lo que sea también, no fui capaz de comprometer una determinada máquina. Esta vez sin embargo sí pude hacerlo de forma manual y vamos a ver distintas formas de hacerlo.</p>
+
+<h2 id="caso-práctico">Caso práctico</h2>
+
+<p>Como siempre, dado que estos posts son ideas y notas que puedan servir de una forma rápida en el futuro como base para otros menesteres, no supondrá un Writeup completo de la máquina.</p>
+
+<p>Se parte de una situación previa donde se ha realizado una exhaustiva enumeración de tal forma que hemos descubierto que tenemos un servico SMB vulnerable a <a href="https://support.microsoft.com/es-es/topic/ms17-010-actualizaci%C3%B3n-de-seguridad-para-windows-server-de-smb-14-de-marzo-de-2017-435c22fb-5f9b-f0b3-3c4b-b605f4e6a655">MS17-010</a> o EternalBlue para los amigos.</p>
+
+<p>También sabemos que la máquina víctima u objetivo puede correr un Windows Server 2008-2012-2016.</p>
+
+<p>Y por último, <strong>poseemos unas credenciales de acceso no privilegiado para el servicio SMB.</strong></p>
+
+<p>En mi caso particular, los exploits que he encontrado para esta vulnerabilidad son muy poco estables y propensos a dejar la máquina inhábil.</p>
+
+<p>En un primer lugar he probado con <a href="https://github.com/3ndG4me/AutoBlue-MS17-010">Autoblue</a>, el cual facilita un poco el proceso manual que se indicaba <a href="https://raul-profesor.github.io/Curso-especialista-ciberseguridad/segof/EternalBlue/">en el ejercicio del curso de especialización</a> ya que genera el payload con msfvenom y combina los ejecutables para ambas arquitecturas de forma automatizada.</p>
+
+<p>Al no conseguir el éxito de esta forma en el caso que nos ocupa, buscamos otros exploits, como por ejemplo:</p>
+
+<p><img src="../img/eternal/search-eternal.png" alt="" /></p>
+
+<p>Vemos que tenemos otro serio candidato a utilizar y que, a modo de spoiler, puedo confirmar que funciona adecuadamente.</p>
+
+<h3 id="hands-on-o-en-castizo-manos-a-la-obra">Hands-on o, en castizo, manos a la obra</h3>
+
+<p>El exploit que vamos a utilizar no es más que una PoC. Si examinamos el código vemos que lo que hace es crear un archivo de texto <code class="language-plaintext highlighter-rouge">pwned.txt</code> en el directorio compartido de SMB a modo de prueba de que es vulnerable:</p>
+
+<p><img src="../img/eternal/poc.png" alt="" /></p>
+
+<p>Lo bueno de Internet es que mucha gente válida e inteligente ha decidido compartir su conocimiento de forma gratuita con el resto de mortales, para que aprendamos de ellos. Esta suerte <a href="https://redteamzone.com/EternalBlue/">nos permite conocer distintos métodos de hacer uso de este exploit</a> para vulnerar de una forma más o menos ruidosa una máquina.</p>
+
+<h4 id="método-1-subiendo-una-shell-a-pecho-descubierto-como-elefante-en-cacharrería">Método 1: Subiendo una shell a pecho descubierto, como elefante en cacharrería</h4>
+
+<p>Siguiendo los pasos indicados, podemos crear un payload para nuestra shell inversa haciendo uso de <code class="language-plaintext highlighter-rouge">msfvenom</code>:</p>
+
+<p><img src="../img/eternal/msfvenom.png" alt="" /></p>
+
+<p>Y modificamos el código en consonancia:</p>
+
+<p><img src="../img/eternal/metodo1.png" alt="" /></p>
+
+<p>Bien es cierto que puede que haya que lanzar el exploit varias veces antes de conseguir tener éxito, aunque es bastante más fiable que el resto de los que he probado. Vemos como conseguimos hacernos con un acceso privilegiado a la máquina:</p>
+
+<p><img src="../img/eternal/metodo1-OK.png" alt="" /></p>
+
+<h4 id="método-2-un-poco-más-sigiloso-metal-gear-solid-style">Método 2: Un poco más sigiloso, Metal Gear Solid style</h4>
+
+<p>Nadie podrá discutir que el método anterior, a pesar de ser efectivo, es <em>a lo bruto</em>. Estamos subiendo un archivo ejecutable a la máquina sin ningún tipo de disimulo y esto hará saltar las alarmas de forma inmediata.</p>
+
+<p>Una forma un poco más disimulada es hacer que la máquina víctima acceda al payload en Powershell de forma remota y lo ejecute, siendo todo el proceso en memoria sin tocar el disco.</p>
+
+<p>Para este cometido utilizaremos las famosas shells de Nishang, que en distribuciones Linux enfocadas a la seguridad ya vienen incluidas. En Parrot por ejemmplo, las podemos encontrar en el directorio: <code class="language-plaintext highlighter-rouge">/usr/share/nishang/Shells</code>. Nosotros haremos uso concretamente de <code class="language-plaintext highlighter-rouge">Invoke-PowerSAhellTcp.ps1</code>.</p>
+
+<p>Nos copiamos esa shell a nuestro entorno de trabajo y justo al final del archivo, añadimos lo que nos hace falta para nuestra reverse shell:</p>
+
+<p><img src="../img/eternal/metodo2.png" alt="" /></p>
+
+<p>Y modificamos de nuevo el código del exploit en consonancia:</p>
+
+<p><img src="../img/eternal/metodo2-2.png" alt="" /></p>
+
+<p>Puesto que ahora la máquina víctima accederá al payload vía <code class="language-plaintext highlighter-rouge">HTTP</code>, debemos servir el script de Powershell mediante un sencillo servidor web, utilizando Python. Con todo preparado, ejecutamos de nuevo:</p>
+
+<p><img src="../img/eternal/metodo2-OK.png" alt="" /></p>
+
+<p>En los tres terminales de la imagen y por orden cronológico:</p>
+
+<ol>
+  <li>En el de arriba a la izquierda, se lanza de nuevo el exploit contra la IP de la máquina víctima</li>
+  <li>En el terminal de la derecha podemos observar como se produce un acceso HTTP exitoso a nuestro servidor para solicitar el script de <em>powershell</em></li>
+  <li>Por último en el terminal de abajo a la izquierda, donde teniamos un netcat escuchando en el puerto al que conectará nuestro script de powershell para devolvernos la shell inversa, vemos como finalmente se obtiene dicha shell como <code class="language-plaintext highlighter-rouge">system</code>.</li>
+</ol>
+
+<h4 id="método-3-intentando-ser-un-poco-sutil">Método 3: Intentando ser un poco sutil</h4>
+
+<p>En algún momento puede que queramos ser un poco más sigilosos y que la máquina víctima no nos devuelva una shell inversa o se conecte a cualquier otro sitio para descargarse ningún archivo, cosas ambas que podrían levantar bastantes sospechas.</p>
+
+<p>En ese caso podemos optar por, directamente, crear un usuario privilegiado administrador en la máquina víctima y, directamente, hacer login con él.</p>
+
+<p>Para ello modificamos nuestro exploit para que el servicio que creemos, ejecute la acción que deseamos:</p>
+
+<p><img src="../img/eternal/metodo3.png" alt="" /></p>
+
+<p>Hecho esto, repetimos nuestro modus operandi. Primeramente ejecutaremos el exploit y posteriormente, como se ve en el terminal de la derecha, intentaremos hacer login usando el script <code class="language-plaintext highlighter-rouge">psexec</code> de Impacket:</p>
+
+<p><img src="../img/eternal/metodo3-NOK.png" alt="" /></p>
+
+<p>En este caso <code class="language-plaintext highlighter-rouge">psexec.py</code> no encuentrar ningún directorio compartido en SMB que sea escriturable para subir su binario e iniciarlo con el administrador de servicios (sc), así que nos da error y no conseguimos conectarnos.</p>
+
+<p>No obstante, si estuviera disponible, podríamos conectarnos de una forma típica y directa como es RDP:</p>
+
+<p><img src="../img/eternal/metodo3-OK.png" alt="" /></p>
+
+<p>A pesar de esta última ser una forma un poco más silenciosa y elegante, las tres son bastante susceptibles de hacer sonar todas las alarmas y ser bloqueados por EDRs y protecciones varias de endpoints, entre otros elementos.</p>
+
+
+
+        
+          <button title="Toggle Theme" class="theme-toggle">
+  <svg viewBox="0 0 32 32" width="24" height="24" fill="currentcolor">
+    <circle cx="16" cy="16" r="14" fill="none" stroke="currentcolor" stroke-width="4"></circle>
+    <path d="
+             M 16 0
+             A 16 16 0 0 0 16 32
+             z">
+    </path>
+  </svg>
+</button>
+
+        
+        <div class="credits"></div>
+      </div>
+    </main><script async defer src="https://sdk.soopr.co/soopr.js"></script></body>
+</html>

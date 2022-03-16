@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en" class="html" data-theme="dark"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>
+    
+      Fuerza bruta de formulario de login con Hydra mediante port forwarding
+    
+  </title>
+
+  <!-- Begin Jekyll SEO tag v2.7.3 -->
+<meta name="generator" content="Jekyll v4.2.0" />
+<meta property="og:title" content="Fuerza bruta de formulario de login con Hydra mediante port forwarding" />
+<meta name="author" content="Raúl Riesco" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Explicación teórica Hoy voy a compartir algo que me ha parecido interesante para poder contar alguna vez en clase como técnica de hacking y con lo que me he topado en la máquina Internal de THM" />
+<meta property="og:description" content="Explicación teórica Hoy voy a compartir algo que me ha parecido interesante para poder contar alguna vez en clase como técnica de hacking y con lo que me he topado en la máquina Internal de THM" />
+<link rel="canonical" href="https://raul-profesor.github.io/port-forw-ssh-hydra.html" />
+<meta property="og:url" content="https://raul-profesor.github.io/port-forw-ssh-hydra.html" />
+<meta property="og:site_name" content="Raúl Riesco" />
+<meta property="og:image" content="https://soopr.xyz/images/card?url=https://raul-profesor.github.io/port-forw-ssh-hydra.html" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2022-03-09T00:00:00+01:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta property="og:image" content="https://soopr.xyz/images/card?url=https://raul-profesor.github.io/port-forw-ssh-hydra.html" />
+<meta property="twitter:title" content="Fuerza bruta de formulario de login con Hydra mediante port forwarding" />
+<meta name="twitter:site" content="@abhinav" />
+<meta name="twitter:creator" content="@Raúl Riesco" />
+<script type="application/ld+json">
+{"url":"https://raul-profesor.github.io/port-forw-ssh-hydra.html","description":"Explicación teórica Hoy voy a compartir algo que me ha parecido interesante para poder contar alguna vez en clase como técnica de hacking y con lo que me he topado en la máquina Internal de THM","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://raul-profesor.github.io/port-forw-ssh-hydra.html"},"author":{"@type":"Person","name":"Raúl Riesco"},"headline":"Fuerza bruta de formulario de login con Hydra mediante port forwarding","dateModified":"2022-03-09T00:00:00+01:00","datePublished":"2022-03-09T00:00:00+01:00","@context":"https://schema.org"}</script>
+<script async defer data-soopr-token="" src="https://sdk.soopr.co/soopr.js"  ></script>
+<!-- End Jekyll SEO tag -->
+
+  <link type="application/atom+xml" rel="alternate" href="https://raul-profesor.github.io/feed.xml" title="Raúl Riesco" />
+
+  <link rel="shortcut icon" type="image/x-icon" href="//logo.png" />
+  <link rel="stylesheet" href="/assets/css/main.css" />
+  
+    <script type="text/javascript">
+  window.addEventListener('load', themeChange);
+  const currentTheme = localStorage.getItem('theme') ? localStorage.getItem('theme') : null;
+  if (currentTheme)
+    document.documentElement.setAttribute('data-theme', currentTheme);
+
+  function themeChange() {
+    let button = document.querySelector('.theme-toggle');
+
+    button.addEventListener('click', function (e) {
+      let currentTheme = document.documentElement.getAttribute('data-theme');
+      if (currentTheme === 'dark') {
+        transition();
+        document.documentElement.setAttribute('data-theme', 'light');
+        localStorage.setItem('theme', 'light');
+      } else {
+        transition();
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
+      }
+    });
+
+    let transition = () => {
+      document.documentElement.classList.add('transition');
+      window.setTimeout(() => {
+        document.documentElement.classList.remove('transition');
+      }, 1000);
+    }
+  }
+</script>
+
+
+  
+</head>
+<body>
+    <main class="page-content" aria-label="Content">
+      <div class="w">
+        <a href="/">Página principal</a>
+<h1 class="post-title">Fuerza bruta de formulario de login con Hydra mediante port forwarding</h1>
+<p class="post-date text-bold text-upcase">
+  
+    <span>March 2022</span>
+  
+</p>
+
+<div class="soopr-btn"
+   data-twitter="SooprCo"
+>
+</div>
+
+<h2 id="explicación-teórica">Explicación teórica</h2>
+<p>Hoy voy a compartir algo que me ha parecido interesante para poder contar alguna vez en clase como técnica de hacking y con lo que me he topado en la máquina <a href="https://tryhackme.com/room/internal">Internal</a> de THM</p>
+
+<p>No vamos a partir de 0, sino de una supuesta situación donde ya hemos llevado a cabo un trabajo previo como una exhaustiva enumeración, compromiso de una máquina y enumeración de nuevo.</p>
+
+<p>Supongamos que hemos comprometido una máquina de tal forma que tenemos acceso mediante SSH. Hemos comprobado que tenemos una interfaz con la IP <code class="language-plaintext highlighter-rouge">172.17.0.1</code>, lo cuál ya nos da una pista de algo que confirmaremos más adelante.</p>
+
+<p><img src="../img/hydra/ip-a.png" alt="" /></p>
+
+<p>Además, en el proceso de enumeración hemos descubierto que en la IP <code class="language-plaintext highlighter-rouge">172.17.0.2</code> tenemos un puerto 8080 a la escucha.</p>
+
+<h2 id="caso-práctico">Caso práctico</h2>
+<p>El problema es que desde la interfaz de nuestra VPN <code class="language-plaintext highlighter-rouge">10.9.0.0/16</code> sólo tenemos acceso al segmento de red de las máquinas de THM <code class="language-plaintext highlighter-rouge">10.10.0.0/16</code> pero no al segmento <code class="language-plaintext highlighter-rouge">172.17.0.0/16</code>.</p>
+
+<p>Una posible solución a esta situación es realizar una redirección de puertos o túnel SSH hacia la segunda máquina aprovechándonos de nuestro acceso SSH a la primera y que ambas comparten interfaz. De esta forma desde nuestra máquina atacante podremos tener acceso a la segunda máquina, en principio inaccesible, haciendo uso del acceso SSH a la primera de ellas.</p>
+
+<p>La <a href="https://www.tecmint.com/create-ssh-tunneling-port-forwarding-in-linux/">manera</a> de hacer esto sería:</p>
+
+<p><img src="../img/hydra/tunelSSH.png" alt="" /></p>
+
+<p>Con esto conseguimos que accediendo al puerto <code class="language-plaintext highlighter-rouge">9001</code> de nuestra máquina local y, utilizando la conexión SSH de la máquina <code class="language-plaintext highlighter-rouge">internal.thm</code>, en realidad accedamos al puerto <code class="language-plaintext highlighter-rouge">8080</code> de la máquina remota.</p>
+
+<p>De la enumeración previa ya habríamos llegado a la conclusión de que debía ser un servicio web, así que probamos a acceder con el navegador para comprobar que la redirección es correcta:</p>
+
+<p><img src="../img/hydra/jenkinsweb.png" alt="" /></p>
+
+<p>Resulta ser un panel de login de Jenkins.</p>
+
+<p>Si hacemos una búsqueda rápida de las credenciales por defecto de Jenkins, vemos que el usuario por defecto es <code class="language-plaintext highlighter-rouge">admin</code> y la contraseña la que tenga configurada. Así pues, podemos proceder a un ataque de fuerza bruta contra este formulario de login.</p>
+
+<p>Este login va por una petición <code class="language-plaintext highlighter-rouge">POST</code> y debemos ver como se forma para poder lanzar el ataque adecuado al formato de <a href="https://github.com/vanhauser-thc/thc-hydra">Hydra</a>. Para ver la petición, podemos utilizar o bien Burp Suite o simplemente las herramientas de desarrollador del navegador:</p>
+
+<p><img src="../img/hydra/post1.png" alt="" /></p>
+
+<p><img src="../img/hydra/post2.png" alt="" /></p>
+
+<p>Y por tanto, llevamos a cabo el ataque especificado con el siguiente comando completo (el formato de Hydra podemos consultarlo en su ayuda):</p>
+
+<p><img src="../img/hydra/hydra.png" alt="" /></p>
+
+<p>Una vez obtenidas las credenciales, podemos obtener una reverse shell en la nueva máquina siguiendo el procedimiento que nos explican en el siempre útil libro de 
+<a href="https://book.hacktricks.xyz/pentesting/pentesting-web/jenkins#execute-groovy-script">Hacktricks</a>.</p>
+
+<p>Primero ajustamos el <em>payload</em> en Base64 para el caso de nuestra IP y nuestro puerto:</p>
+
+<p><img src="../img/hydra/cyberchef.png" alt="" /></p>
+
+<p>Y luego lo empleamos en el procedimiento que hemos visto en Hacktricks:</p>
+
+<p><img src="../img/hydra/shell_jenkins.png" alt="" /></p>
+
+<p><img src="../img/hydra/shell_jenkins2.png" alt="" /></p>
+
+<p>Una vez obtenida la reverse shell, confirmamos algo casi obvio, atendiendo a dos motivos:</p>
+
+<ol>
+  <li>En la fase de enumeración habremos visto que Docker está instalado en la primera máquina que atacamos</li>
+  <li>La red <code class="language-plaintext highlighter-rouge">172.17.0.0/16</code> es propia de Docker</li>
+</ol>
+
+<p>Además, si se nos ocurre atender a la salida de un <code class="language-plaintext highlighter-rouge">netstat</code> en la primera máquina, veremos que el puerto <code class="language-plaintext highlighter-rouge">8080</code> está expuesto para la máquina local, haciendo sospechar que está publicado para llegar al contenedor Docker en el mismo puerto:</p>
+
+<p><img src="../img/hydra/net.png" alt="" /></p>
+
+<p>No obstante, comprobémoslo:</p>
+
+<p><img src="../img/hydra/shell_jenkins3.png" alt="" /></p>
+
+<p>Y corroboramos que, efectivamente, estamos dentro de un contenedor Docker.</p>
+
+<p>Esto lo habremos consultado <a href="https://stackoverflow.com/questions/20010199/how-to-determine-if-a-process-runs-inside-lxc-docker">aquí</a> ya que ni de lejos somos los primeros en preguntarnos como averigüar si estamos trabajando dentro de un contenedor.</p>
+
+<p>Así pues, tendríamos que continuar intentado técnicas para escapar del contenedor o enumerar el propio contenedor para continuar buscando nuestra flag de root. Esto ya escapa a la intención del post que pretendía hacer notar el mecanismo para la redirección de puertos.</p>
+
+
+
+        
+          <button title="Toggle Theme" class="theme-toggle">
+  <svg viewBox="0 0 32 32" width="24" height="24" fill="currentcolor">
+    <circle cx="16" cy="16" r="14" fill="none" stroke="currentcolor" stroke-width="4"></circle>
+    <path d="
+             M 16 0
+             A 16 16 0 0 0 16 32
+             z">
+    </path>
+  </svg>
+</button>
+
+        
+        <div class="credits"></div>
+      </div>
+    </main><script async defer src="https://sdk.soopr.co/soopr.js"></script></body>
+</html>
