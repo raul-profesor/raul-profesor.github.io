@@ -106,7 +106,6 @@ Teniendo ya los nombres de usuario, vamos a obtener sus contraseñas haciendo us
 
 ![](../img/nosqli/17.png)
 
-![](../img/nosqli/18.png)
 Y esta es una explicación básica, sencilla y somera de las nociones de inyecciones NoSQL.
 
 También existe la opción, un poco menos cómoda pero más sencilla, de realizar este proceso con [Burp Suite](https://rioasmara.com/2020/08/13/nosql-injection-and-bruteforce/)
