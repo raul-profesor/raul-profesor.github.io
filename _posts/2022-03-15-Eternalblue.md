@@ -107,4 +107,4 @@ No obstante, si estuviera disponible, podríamos conectarnos de una forma típic
 
 A pesar de esta última ser una forma un poco más silenciosa y elegante, las tres son bastante susceptibles de hacer sonar todas las alarmas y ser bloqueados por EDRs y protecciones varias de endpoints, entre otros elementos.
 
-
+**EDIT-** De casualidad me he encontrado con [este post](https://deephacking.tech/por-que-se-pueden-ejecutar-comandos-a-traves-de-smb/) que me parece interesante para entender el por qué podemos utilizar este exploit en SMB para crear y ejecutar el servicio. 
