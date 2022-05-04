@@ -1,5 +1,205 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="https://raul-profesor.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://raul-profesor.github.io/" rel="alternate" type="text/html" /><updated>2022-03-15T22:59:19+01:00</updated><id>https://raul-profesor.github.io/feed.xml</id><title type="html">Raúl Riesco</title><subtitle>Moonwalk is a fast and elegant Jekyll theme with a clean dark mode. It comes with horizontal list (for navbar and footer), card list (for portfolio), and a generic vertical list. It is very easy to modify in case you want to build over it - please see _layouts/home.html to do that.
-</subtitle><author><name>Raúl riesco</name></author><entry><title type="html">Métodos de explotación manual de EternalBlue</title><link href="https://raul-profesor.github.io/eternalblue.html" rel="alternate" type="text/html" title="Métodos de explotación manual de EternalBlue" /><published>2022-03-15T00:00:00+01:00</published><updated>2022-03-15T00:00:00+01:00</updated><id>https://raul-profesor.github.io/Eternalblue</id><content type="html" xml:base="https://raul-profesor.github.io/eternalblue.html">&lt;h2 id=&quot;explicación-teórica&quot;&gt;Explicación teórica&lt;/h2&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="https://raul-profesor.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://raul-profesor.github.io/" rel="alternate" type="text/html" /><updated>2022-05-04T11:03:58+02:00</updated><id>https://raul-profesor.github.io/feed.xml</id><title type="html">Raúl Riesco</title><subtitle>Moonwalk is a fast and elegant Jekyll theme with a clean dark mode. It comes with horizontal list (for navbar and footer), card list (for portfolio), and a generic vertical list. It is very easy to modify in case you want to build over it - please see _layouts/home.html to do that.
+</subtitle><author><name>Raúl riesco</name></author><entry><title type="html">Escalada de privilegio mediante abuso de GPO</title><link href="https://raul-profesor.github.io/gpo-abuse.html" rel="alternate" type="text/html" title="Escalada de privilegio mediante abuso de GPO" /><published>2022-05-03T00:00:00+02:00</published><updated>2022-05-03T00:00:00+02:00</updated><id>https://raul-profesor.github.io/GPO_Abuse</id><content type="html" xml:base="https://raul-profesor.github.io/gpo-abuse.html">&lt;h2 id=&quot;explicación-teórica&quot;&gt;Explicación teórica&lt;/h2&gt;
+
+&lt;p&gt;Supongamos que hemos vulnerado una máquina Windows y que tenemos una shell de usuario raso.&lt;/p&gt;
+
+&lt;p&gt;Decididmos estudiar los posibles métodos de escalada de privilegios haciendo uso de &lt;a href=&quot;https://github.com/BloodHoundAD/BloodHound&quot;&gt;Bloodhound&lt;/a&gt; para enumerar el dominio, sus objetos y propiedades.&lt;/p&gt;
+
+&lt;p&gt;Descubrimos que existe una GPO que podemos modificar porque tenemos permiso de escritura sobre ella. Veremos como hacerlo para incluir a nuestro usuario en el grupo de administradores.&lt;/p&gt;
+
+&lt;h2 id=&quot;caso-práctico&quot;&gt;Caso práctico&lt;/h2&gt;
+
+&lt;p&gt;Como ya hemos dicho, mediante el ingestor adecuado, obtenemos el zip con la información que importaremos en Bloodhound. Tras utilizar una query predefinida para obtener el camino más corto hacia el Domain Admin, obtenemos:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/GPOAbuse/vulnnet0.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Es decir, la cuenta con la que hemos obtenido acceso a la máquina, &lt;em&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;enterprise-security&lt;/code&gt;&lt;/em&gt;, tiene permisos de escritura sobre la GPO &lt;em&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;security-pol-vn&lt;/code&gt;&lt;/em&gt;, dentro del dominio &lt;em&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vulnnet.local&lt;/code&gt;&lt;/em&gt;, que contiene al usuario &lt;em&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Administrator&lt;/code&gt;&lt;/em&gt; y al grupo &lt;em&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Administrators&lt;/code&gt;&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;Es decir, debemos hacer uso de esta GPO o “abusar” de ella mediante la herramienta adecuada. Para este cometido tentemos &lt;a href=&quot;https://github.com/FSecureLABS/SharpGPOAbuse&quot;&gt;SharpGPOAbuse&lt;/a&gt;. En teoría, es necesario compilar el código de esta aplicación para obtener el ejecutable:&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;SharpGPOAbuse has been built against .NET 3.5 and is compatible with Visual Studio 2017.&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;No obstante, es posible encontrar alguna versión precompilada, como por ejemplo &lt;a href=&quot;https://github.com/byronkg/SharpGPOAbuse&quot;&gt;aquí&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;transferencia-de-sharpgpoabuseexe-a-la-máqjuina-víctima&quot;&gt;Transferencia de SharpGPOAbuse.exe a la máqjuina víctima&lt;/h3&gt;
+
+&lt;p&gt;Tras obtener nuestra shell inversa mediante cualquier método, procederemos a transmitir este ejecutable desde nuestra máquina atacante a nuestra máquina víctima.&lt;/p&gt;
+
+&lt;p&gt;Tras ello, se comprueba la información de la cuenta de usuario comprometida:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/GPOAbuse/vulnnet.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Notar que el usuario sólo pertenece al grupo de usuarios de dominio (Domain Users)&lt;/p&gt;
+
+&lt;h3 id=&quot;uso-y-sintaxis-de-sharpgpoabuseexe&quot;&gt;Uso y sintaxis de SharpGPOAbuse.exe&lt;/h3&gt;
+
+&lt;p&gt;Siguiendo la sintaxis que se nos indica en su github, hacemos uso de esta aplicación para añadir una nueva tarea al dominio, ejecutada por el administrador y que consiste en añadir el usuario omprometido al grupo de administradores mediante la GPO susceptible de ser abusada.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/GPOAbuse/vulnnet2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;También forzamos la actualización de las políticas.&lt;/p&gt;
+
+&lt;p&gt;Y si comprobamos ahora la información de la cuenta de usuario, vemos que pertenecemos al grupo &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Administrators&lt;/code&gt;, ergo somos administradores del dominio.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/GPOAbuse/vulnnet3.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Por lo que podemos conectarnos de forma remota con este usuario y con &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;psexec&lt;/code&gt; y comprobar que, efectivamente, nuestra cuenta es &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;nt authority\system&lt;/code&gt;&lt;/p&gt;</content><author><name>Raúl Riesco</name></author><summary type="html">Explicación teórica</summary></entry><entry><title type="html">Escalada de privilegios en contenedores Docker (II)</title><link href="https://raul-profesor.github.io/docker-ii.html" rel="alternate" type="text/html" title="Escalada de privilegios en contenedores Docker (II)" /><published>2022-03-31T00:00:00+02:00</published><updated>2022-03-31T00:00:00+02:00</updated><id>https://raul-profesor.github.io/Docker-II</id><content type="html" xml:base="https://raul-profesor.github.io/docker-ii.html">&lt;h2 id=&quot;explicación-teórica&quot;&gt;Explicación teórica&lt;/h2&gt;
+
+&lt;p&gt;Ya comentábamos en un post anterior que una de las precauciones que había que tener al utilizar contenedores Docker o de cualquier otro tipo, era a la hora de montar volúmenes.&lt;/p&gt;
+
+&lt;p&gt;En este caso veremos otra precacución a tener en cuenta, el hecho de montar el socket de Docker en el anfitrión &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/var/run/socker.dock&lt;/code&gt; directamente en el contenedor.&lt;/p&gt;
+
+&lt;h3 id=&quot;qué-es-dockersock&quot;&gt;¿Qué es &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker.sock&lt;/code&gt;?&lt;/h3&gt;
+
+&lt;p&gt;Docker es un servicio que corre en la máquina anfitrión. Este servicio se comunica con los clientes mediante un socket. Dicho de otra forma, la linea de comandos de Docker (docker-cli) utiliza sockets para comunicarse con el demonio de Docker.&lt;/p&gt;
+
+&lt;p&gt;Así pues, el demonio de Docker (dockerd) escucha peticiones a través de la API de Docker y de esta forma maneja objetos Docker tales como imágenes, contenedores, redes y volúmenes.&lt;/p&gt;
+
+&lt;p&gt;Este demonio ( o Docker Engine en alguna literartura) soporta 3 tipos de sockets: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;unix&lt;/code&gt;, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;tcp&lt;/code&gt; y &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;fd&lt;/code&gt;. Por temas de seguridad, por defecto utiliza el tipo &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;unix&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Si quisiéramos poder hacer llamadas a la API a través de la red porque nuestro diseño así lo exige, utilizaríamos el socket de tipo &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;tcp&lt;/code&gt; y es aquí cuando tendríamos un riesgo de seguridad. El propietario de &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/var/run/docker.sock&lt;/code&gt; es &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;root&lt;/code&gt;, por lo que si se tiene acceso a este socket desde el contenedor comprometiéndolo, al haberlo montado como volúmen, tenemos un riesgo potencial de que alguien tenga acceso root a nuestra máquina anfitrión, es decir, una escalada de privilegios escapando del contenedor.&lt;/p&gt;
+
+&lt;p&gt;Una prueba sencilla de que este socket está en funcionamiento podríamos realizarla corriendo un contenedor y luego consultando la información de dicho contenedor con curl:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/dockerII/alpine1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Esta consulta a la API equivaldría a un &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker ps -a&lt;/code&gt; en docker-cli:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/dockerII/API1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;por-qué-querría-montar-el-socket-en-el-contenedor&quot;&gt;¿Por qué querría montar el socket en el contenedor?&lt;/h3&gt;
+
+&lt;p&gt;Cuando uno intenta documentarse sobre este asunto, lo que leerá el 90% de las ocasiones será &lt;strong&gt;¡¡No montes /docker/run/docker.sock en tu contenedor!!&lt;/strong&gt;. Sin duda una solución estupenda que elimina todo riesgo al respecto.&lt;/p&gt;
+
+&lt;p&gt;Ahora bien, podemos encontrarnos que se ha montado el socket en el contenedor por diversos motivos, como por ejemplo:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Los desarrolladores lo dejan montado para depurar sus aplicaciones leyendo los logs de dentro del contenedor&lt;/li&gt;
+  &lt;li&gt;Queremos que una aplicación como &lt;a href=&quot;https://onthedock.github.io/post/170429-portainer-para-gestionar-tus-contenedores-en-docker/&quot;&gt;Portainer&lt;/a&gt; pueda crear contenedores&lt;/li&gt;
+  &lt;li&gt;Queremos poder crear y lanzar contenedores desde dentro de otro contenedor. Un ejemplo sería un contenedor con un pipeline de Jenkins que construya y lance imágenes Docker&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;caso-práctico&quot;&gt;Caso práctico&lt;/h2&gt;
+
+&lt;p&gt;La idea subyacente para esta escalada de privilegios es bastante simple. Puesto que el contenedor que teóricamente hemos comprometido corre con el usuario root dentro del contenedor, que a su vez se corresponde con el usuario root del sistema anfitrión, podremos crear y correr un nuevo contenedor que monte como volumen el sistema raíz del anfitrión. Y esto nos llevaría al anterior caso que ya discutimos en el blog de escalada de privilegios en Docker, ya que tendríamos acceso por completo al sistema anfitrión.&lt;/p&gt;
+
+&lt;p&gt;Como una imagen vale más que mil palabras, vamos a ello. Creamos un contenedor con una imagen de Alpine que monte como volumen &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/var/run/docker.sock&lt;/code&gt; y comprobamos que se ha montado bien:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/dockerII/alpine2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Y se nos ofrece información sobre los contenedores. Esta consulta es equivalente a realizar un &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker ps -a&lt;/code&gt;:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/dockerII/contenedores1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Una vez dentro del contenedor comprometido, que está ejecutándose con el usuario root por defecto, descargamos &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker-cli&lt;/code&gt;:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/dockerII/alpine3.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;En nuestro sistema anfitrión hemos creado un simple archivo de texto para comprobar que conseguimos escapar desde el contenedor y acceder al sistema de archivos del anfitrión, así como modificarlo:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/dockerII/alpine4.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Así pues, contando ya con &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker-cli&lt;/code&gt; en el contenedor, lanzamos un nuevo contenedor que monte como volumen el directorio raíz &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/&lt;/code&gt; del sistema en el directorio &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;owned&lt;/code&gt; del contenedor:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/dockerII/alpine5.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Y vemos que hemos conseguido escapar del contendor hacia sl sistema de archivos del anfitrión y además con acceso root, puesto que el root del contenedor se mapea con un usuario que pertenece al grupo docker y que, por tanto, tiene privilegios de root como vismo en el anterior post.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/dockerII/alpine6.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Si por lo que fuera no pudiéramos instalar &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker-cli&lt;/code&gt; en el contenedor, podríamos realizar el mismo proceso mediante llamadas a la API usando &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;curl&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Primero consultamos los contenedores corriendo en el sistema (equivalente a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker ps&lt;/code&gt;), posteriormente, utilizando JSON, creamos un nuevo contenedor de Alpine, que monte el volumen deseado, como en el caso anterior cuando utilizamos &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker-cli&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/dockerII/alpine7.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Y lo iniciamos:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/dockerII/alpine8.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Como hemos hecho un &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;chroot /owned&lt;/code&gt;, tenemos acceso a los binarios del sistema. Podemos utilizar socat  para comunicarnos con el socket de Docker, &lt;em&gt;“secuestrando”&lt;/em&gt; la conexión http para transportar la información de stdin/stdout/stderr:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/dockerII/alpine10.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Y vemos que conseguimos escapar del contenedor al sistema de archivos del sistema anfitrión:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/dockerII/alpine11.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/dockerII/alpine12.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Si no dispusiéramos de &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;curl&lt;/code&gt;, podríamos haber hecho las llamadas a la API con &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;socat&lt;/code&gt; igualmente.&lt;/p&gt;
+
+&lt;h2 id=&quot;mitigación&quot;&gt;Mitigación&lt;/h2&gt;
+
+&lt;p&gt;Cuando me he documentado sobre este problema, parece difícil encontrar una solución satisfactoria.&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;El primer consejo que uno encuentra siempre es nunca exponer o publicar el socket de Docker. De hecho, se suele leer que en el caso de tener que publicarlo, se debería replantear seriamente el diseño de la infraestructura para poder evitarlo. Si acaso, tímidamente se recomienda no exponer el socket fuera de la red interna y hacerlo en un entorno muy seguro y controlado.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;El argumento que se esgrime, con mucha razón, es que muchos tutoriales o guías en Internet simplemente exponen el socket sin mayor explicación sobre los riesgos de seguridad que implica, por una mayor facilidad y rapidez en el proceso. Esto hace que mucha gente publique sus sockets por seguir ciegamente algún tutorial o manual.&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Retomar la solución del anterior post dedicado a la escalada de privilegios en contenedores. Esta solución consistía en remapear el usuario &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;root&lt;/code&gt; del contenedor a un usuario sin privilegios en el namespace del sistema. En su día utilizamos este script para ese cometido:&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/dockerII/remap1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;El usuario y grupo &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;dockremap&lt;/code&gt; es el &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;default&lt;/code&gt; para Docker, aunque podríamos hacerlo con uno diferente que creáramos para tal cometido. Este remapeo puede quedar registrado en la configuración del demonio &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/docker/daemon.json&lt;/code&gt; de forma global o bien, hacerlo de forma concreta para un contenedor al lanzarlo mediante &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker-cli&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Podremos comprobar que, efectivamente, con esta solución no podemos crear contenedores nuevos desde dentro del contenedor:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/dockerII/userremap.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Otra opción es utilizar el modo &lt;em&gt;rootless&lt;/em&gt; de ejecución de Docker, tal y &lt;a href=&quot;https://docs.docker.com/engine/security/rootless/&quot;&gt;como está documentado en su sitio web&lt;/a&gt;. Esto permite ejecutar tanto el demonio como los contenedores con un usuario no root.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Esta opción es relativamente nueva en Docker y hasta ahora, al no existir, una posible alternativa era utilizar &lt;strong&gt;Podman.&lt;/strong&gt; Podman es la implementación propia de Red Hat de su herramienta para el manejo de contenedores, completamente compatible con docker-cli y, desde hace poco, con docker-compose.&lt;/p&gt;
+
+&lt;p&gt;Podman no utiliza ningún demonio y por tanto, desde su diseño inicial y por defecto, corre los contenedores sin permisos de root. No obstante, buscando opiniones de usuarios que han experimentado con él, parece que aún no está muy asentado en entornos de producción, aunque cumple sobradamente para el resto de cometidos. Además, tiene integración muy sencilla con Kubernetes.&lt;/p&gt;
+
+&lt;p&gt;Ahora bien, puede haber casos en los que sea necesario publicarlo en la red. Ya hemos comentado antes del caso de Portainer, también puede darse el caso de utilizar Traefik como proxy inverso para nuestros contenedores o Jenkins para construir y correr contenedores.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/dockerII/traefik.png&quot; alt=&quot;&quot; style=&quot;height:440px;width:550px&quot; /&gt;&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;Para estos casos, aún existen alguna posibibilidad y la misma &lt;a href=&quot;https://docs.docker.com/engine/security/protect-access/&quot;&gt;documentación de Docker&lt;/a&gt; nos ofrece soluciones; utilizar TLS(HTTPS) o SSH con certiFicados para asegurar el acceso al socket&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;También en la &lt;a href=&quot;https://doc.traefik.io/traefik/providers/docker/#docker-api-access&quot;&gt;documentación&lt;/a&gt; de Traefik se comentan soluciones y hacen referencias a múltiples discusiones al respecto en Internet con las que yo también me ido topándome al documentarme. Aparte de las previamente comentadas:&lt;/p&gt;
+
+    &lt;ul&gt;
+      &lt;li&gt;
+        &lt;p&gt;Utilizar un proxy que filtre las peticiones en los accesos desde la red externa a los contenedores, de tal forma que se restrinja muy bien que tipos de llamadas se pueden realizar a la API. Por ejemplo con &lt;a href=&quot;https://github.com/Tecnativa/docker-socket-proxy&quot;&gt;Tecnativa&lt;/a&gt;.&lt;/p&gt;
+      &lt;/li&gt;
+      &lt;li&gt;
+        &lt;p&gt;También se puede utilizar Nginx de &lt;a href=&quot;https://github.com/nginx-proxy/nginx-proxy/blob/main/README.md#separate-containers&quot;&gt;esta&lt;/a&gt;] forma como proxy inverso, con dos contenedores diferentes, de tal forma que se expone el socket de Docker pero en un contenedor únicamente con acceso local.&lt;/p&gt;
+      &lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Utilizar un plugin de Docker para autorizar accesos. Explicado &lt;a href=&quot;https://docs.docker.com/engine/extend/plugins_authorization/&quot;&gt;aquí&lt;/a&gt; en su documentación.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Utilizar métodos de protección a nivel de Kernel como SELinux o Apparmor.&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Sea como fuera, si por razones de diseño impepinables se debe exponer el socket y es imposible un rediseño que lo impida, existen ciertas soluciones que se han explicado y que habría que estudiar para cada caso concreto.&lt;/p&gt;
+
+&lt;p&gt;Destacar que esta preocupación, a pesar de ser algo bastante importante, no está ni mucho menos extendida en gran medida y es por ello que estas soluciones son muy recientes en el tiempo a la hora de escribir este post.&lt;/p&gt;
+
+&lt;h2 id=&quot;referencias&quot;&gt;Referencias&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://blog.quarkslab.com/why-is-exposing-the-docker-socket-a-really-bad-idea.html&quot;&gt;1&lt;/a&gt;
+&lt;a href=&quot;https://greencashew.dev/posts/docker-container-breakout-using-docker.sock/&quot;&gt;2&lt;/a&gt;
+&lt;a href=&quot;https://news.ycombinator.com/item?id=17983623&quot;&gt;3&lt;/a&gt;
+&lt;a href=&quot;https://news.ycombinator.com/item?id=24568973&quot;&gt;4&lt;/a&gt;
+&lt;a href=&quot;https://integratedcode.us/2016/04/20/sharing-the-docker-unix-socket-with-unprivileged-containers-redux/&quot;&gt;5&lt;/a&gt;
+&lt;a href=&quot;https://www.practical-devsecops.com/lesson-4-hacking-containers-like-a-boss/&quot;&gt;6&lt;/a&gt;
+&lt;a href=&quot;&quot;&gt;7&lt;/a&gt;&lt;/p&gt;</content><author><name>Raúl Riesco</name></author><summary type="html">Explicación teórica</summary></entry><entry><title type="html">Métodos de explotación manual de EternalBlue</title><link href="https://raul-profesor.github.io/eternalblue.html" rel="alternate" type="text/html" title="Métodos de explotación manual de EternalBlue" /><published>2022-03-15T00:00:00+01:00</published><updated>2022-03-15T00:00:00+01:00</updated><id>https://raul-profesor.github.io/Eternalblue</id><content type="html" xml:base="https://raul-profesor.github.io/eternalblue.html">&lt;h2 id=&quot;explicación-teórica&quot;&gt;Explicación teórica&lt;/h2&gt;
 
 &lt;p&gt;En el curso de especialización de ciberseguridad &lt;a href=&quot;https://raul-profesor.github.io/Curso-especialista-ciberseguridad/segof/servicios_desact/#un-caso-real-eternalblue-ms17-010-smbv1-y-wannacry&quot;&gt;ya he hablado&lt;/a&gt; de la archiconocida vulnerabilidad EternalBlue.&lt;/p&gt;
 
@@ -99,7 +299,9 @@
 
 &lt;p&gt;&lt;img src=&quot;../img/eternal/metodo3-OK.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;A pesar de esta última ser una forma un poco más silenciosa y elegante, las tres son bastante susceptibles de hacer sonar todas las alarmas y ser bloqueados por EDRs y protecciones varias de endpoints, entre otros elementos.&lt;/p&gt;</content><author><name>Raúl Riesco</name></author><summary type="html">Explicación teórica</summary></entry><entry><title type="html">Fuerza bruta de formulario de login con Hydra mediante port forwarding</title><link href="https://raul-profesor.github.io/port-forw-ssh-hydra.html" rel="alternate" type="text/html" title="Fuerza bruta de formulario de login con Hydra mediante port forwarding" /><published>2022-03-09T00:00:00+01:00</published><updated>2022-03-09T00:00:00+01:00</updated><id>https://raul-profesor.github.io/Port_forw_SSH_Hydra</id><content type="html" xml:base="https://raul-profesor.github.io/port-forw-ssh-hydra.html">&lt;h2 id=&quot;explicación-teórica&quot;&gt;Explicación teórica&lt;/h2&gt;
+&lt;p&gt;A pesar de esta última ser una forma un poco más silenciosa y elegante, las tres son bastante susceptibles de hacer sonar todas las alarmas y ser bloqueados por EDRs y protecciones varias de endpoints, entre otros elementos.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;EDIT-&lt;/strong&gt; De casualidad me he encontrado con &lt;a href=&quot;https://deephacking.tech/por-que-se-pueden-ejecutar-comandos-a-traves-de-smb/&quot;&gt;este post&lt;/a&gt; que me parece interesante para entender el por qué podemos utilizar este exploit en SMB para crear y ejecutar el servicio.&lt;/p&gt;</content><author><name>Raúl Riesco</name></author><summary type="html">Explicación teórica</summary></entry><entry><title type="html">Fuerza bruta de formulario de login con Hydra mediante port forwarding</title><link href="https://raul-profesor.github.io/port-forw-ssh-hydra.html" rel="alternate" type="text/html" title="Fuerza bruta de formulario de login con Hydra mediante port forwarding" /><published>2022-03-09T00:00:00+01:00</published><updated>2022-03-09T00:00:00+01:00</updated><id>https://raul-profesor.github.io/Port_forw_SSH_Hydra</id><content type="html" xml:base="https://raul-profesor.github.io/port-forw-ssh-hydra.html">&lt;h2 id=&quot;explicación-teórica&quot;&gt;Explicación teórica&lt;/h2&gt;
 &lt;p&gt;Hoy voy a compartir algo que me ha parecido interesante para poder contar alguna vez en clase como técnica de hacking y con lo que me he topado en la máquina &lt;a href=&quot;https://tryhackme.com/room/internal&quot;&gt;Internal&lt;/a&gt; de THM&lt;/p&gt;
 
 &lt;p&gt;No vamos a partir de 0, sino de una supuesta situación donde ya hemos llevado a cabo un trabajo previo como una exhaustiva enumeración, compromiso de una máquina y enumeración de nuevo.&lt;/p&gt;
@@ -272,7 +474,7 @@
   &lt;/li&gt;
 &lt;/ol&gt;
 
-&lt;h2 id=&quot;comprobación-práctica&quot;&gt;Comprobación práctica&lt;/h2&gt;
+&lt;h2 id=&quot;caso-práctico&quot;&gt;Caso práctico&lt;/h2&gt;
 
 &lt;p&gt;Para este escenario me he basado es una explicación genial de un buen &lt;a href=&quot;https://ciberseguridad.blog/como-explotar-la-vulnerabilidad-log4shell-en-nuestro-laboratorio/ ¡&quot;&gt;blog&lt;/a&gt; en español y me parece importante darle su crédito.&lt;/p&gt;
 
@@ -297,7 +499,7 @@
 
 &lt;p&gt;&lt;img src=&quot;../img/log4j/diagrama.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;Así pues, vayamos al lío. Ejecutamos la aplicación vulnerable en el Lubuntu:&lt;/p&gt;
+&lt;p&gt;Así pues, vayamos al lío. Ejecutamos la aplicación vulnerablen en el Lubuntu:&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;../img/log4j/1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
@@ -429,7 +631,6 @@
 
 &lt;p&gt;&lt;img src=&quot;../img/nosqli/17.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;../img/nosqli/18.png&quot; alt=&quot;&quot; /&gt;
-Y esta es una explicación básica, sencilla y somera de las nociones de inyecciones NoSQL.&lt;/p&gt;
+&lt;p&gt;Y esta es una explicación básica, sencilla y somera de las nociones de inyecciones NoSQL.&lt;/p&gt;
 
 &lt;p&gt;También existe la opción, un poco menos cómoda pero más sencilla, de realizar este proceso con &lt;a href=&quot;https://rioasmara.com/2020/08/13/nosql-injection-and-bruteforce/&quot;&gt;Burp Suite&lt;/a&gt;&lt;/p&gt;</content><author><name>Raúl Riesco</name></author><summary type="html">Explicación teórica</summary></entry></feed>
