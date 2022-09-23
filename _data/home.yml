@@ -8,6 +8,9 @@ navbar_entries:
   - title: Curso especialista ciberseguridad 
     url:  http://raul-profesor.github.io/Curso-especialista-ciberseguridad/section
 
+  - title: Despliegue de aplicaciones web 
+    url:  http://raul-profesor.github.io/DEAW
+
   - title: About
     url: about
 
