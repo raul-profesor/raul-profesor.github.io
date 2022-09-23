@@ -1,0 +1,56 @@
+I"k<h2 id="explicación-teórica">Explicación teórica</h2>
+
+<p>A estas alturas se da por sabido qué es y qué no es Docker y en qué se diferencia de las máquinas virtuales. En caso contrario, existen millones de recursos en Internet para informarse y formarse al respecto.</p>
+
+<p>Como bien explica la <a href="https://docs.docker.com/engine/install/linux-postinstall/">documentación oficial de Docker</a>, el demonio de docker utiliza sockets Unix, cuyo propietario por defecto es <code class="language-plaintext highlighter-rouge">root</code> y por tanto, el resto de usuarios deberán hacer uso de <code class="language-plaintext highlighter-rouge">sudo</code> porque el demonio de Docker siempre correrá como usuario <code class="language-plaintext highlighter-rouge">root</code>.</p>
+
+<p>Para evitarnos tener que utilizar <code class="language-plaintext highlighter-rouge">sudo</code> siempre que empleemos comandos Docker, existe el grupo <code class="language-plaintext highlighter-rouge">docker</code> y añadiendo usuarios a él es equivalente a proporcionar privilegios de root a sus usuarios. De ahí surge la posibilidad de la escalada de privilegios que da título a este post.</p>
+
+<p>Además, se debe tener en cuenta que, por defecto, el usuario que corra un contenedor tendrá privilegios <code class="language-plaintext highlighter-rouge">root</code> dentro del mismo.</p>
+
+<p>Y en este caso hablamos de Docker pero es un problema común a todos los sistemas de contenedores, como por ejemplo <a href="https://reboare.github.io/lxd/lxd-escape.html">LXD</a> entre otros.</p>
+
+<h2 id="caso-práctico">Caso práctico</h2>
+
+<p>Vamos a realizar una comprobación desde cero. Nos cremos el usuario <code class="language-plaintext highlighter-rouge">docker_privesc</code> y lo añadimos al grupo <code class="language-plaintext highlighter-rouge">docker</code>:</p>
+
+<p><img src="../img/docker/1.png" alt="" /></p>
+
+<p>Es muy habitual que necesitemos eliminar y reinicar un contenedor porque se ha actualizado la imagen o porque se ha actualido el Dockerfile. Por estos motivos, es igual de habitual que necesitemos tene persistencia de datos y hagamos uso de los conocidos como <a href="https://docs.docker.com/storage/volumes/">volúmenes</a>.</p>
+
+<p>Vamos a crear un contenedor que haga uso de los volúmenes de una forma no recomendable. En primer lugar nos creamos el archivo <code class="language-plaintext highlighter-rouge">root.txt</code> en el directorio <code class="language-plaintext highlighter-rouge">/root</code> del sistema:</p>
+
+<p><img src="../img/docker/2-2.png" alt="" /></p>
+
+<p>Ahora corremos un contenedor con una imagen de <em>alpine</em> haciendo uso de un volumen que montará en el directorio <code class="language-plaintext highlighter-rouge">/mnt</code> del contenedor el directorio <code class="language-plaintext highlighter-rouge">/root</code> de nuestro sistema.</p>
+
+<p><img src="../img/docker/4.png" alt="" /></p>
+
+<p>Observamos que podemos leer sin problemas el archivo creado por root previamente en nuestro sistema. Dicho en otras palabras, tenemos acceso a nuestro sistema como usuario root.</p>
+
+<p>Otra forma aún más obvia de ver el error en el que se puede incurrir con los contenedores, los volúmenes y los privilegios con el que corre el demonio pertinente, podemos verla en la siguiente imagen:</p>
+
+<p><img src="../img/docker/5.png" alt="" /></p>
+
+<p>Corremos la imagen de alpine de forma interactiva, indicándole que tendrá un volumen que mapeará el directorio raíz en el directorio <code class="language-plaintext highlighter-rouge">/mnt</code> del contenedor y que, además, haga un <a href="https://es.wikipedia.org/wiki/Chroot"><code class="language-plaintext highlighter-rouge">chroot</code></a> que convertirá nuestro directorio raíz en el contenedor, en el directorio raíz del sistema. Es decir, ¡somos <code class="language-plaintext highlighter-rouge">root</code> del sistema anfitrión!</p>
+
+<h2 id="mitigación">Mitigación</h2>
+
+<p>La misma documentación oficial de Docker ofrece una propuesta de <a href="https://docs.docker.com/engine/security/userns-remap/#enable-userns-remap-on-the-daemon">solución o mitigación</a> a este problema.</p>
+
+<p>En esencia se nos dice que las aplicacinoes <em>contenerizadas</em> deben correr con usuarios no privilegiados. No obstante, si los procesos de un contenedor concrete deben correr como <code class="language-plaintext highlighter-rouge">root</code> dentro del contenedor, se debe <strong>remapear</strong> este usuario a otro menos privilegiado del sistema anfitrión.</p>
+
+<p>En <a href="https://flast101.github.io/docker-privesc/">este</a> ejemplo se nos muestra, en el punto dedicado a la mitigación, como creando un usuario llamado <code class="language-plaintext highlighter-rouge">dockremap</code>, podemos remapearlo a un usuario poco privilegiado. Podemos comprobarlo siguiendo las instrucciones que allí se nos indican:</p>
+
+<p><img src="../img/docker/8.png" alt="" /></p>
+
+<p>Vemos que el <code class="language-plaintext highlighter-rouge">sleep</code>, efectivamente se nos está ejecutando como <code class="language-plaintext highlighter-rouge">root</code>:</p>
+
+<p><img src="../img/docker/9.png" alt="" /></p>
+
+<p>Tras ejecutar el script que aplica los pasos de mitigación explicados en la documentación oficial:</p>
+
+<p><img src="../img/docker/10.png" alt="" /></p>
+
+<p>El sleep ahora está ejecutado por el usuario <code class="language-plaintext highlighter-rouge">dockremap</code>. Así pues, quedamos protegidos de la escalada de privilegios mientras que en el contenedor el usuario que ejecuta los procesos sí es <code class="language-plaintext highlighter-rouge">root</code></p>
+:ET

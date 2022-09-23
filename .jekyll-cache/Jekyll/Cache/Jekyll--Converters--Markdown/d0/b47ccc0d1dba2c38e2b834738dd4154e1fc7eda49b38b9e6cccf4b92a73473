@@ -1,0 +1,159 @@
+I"Y5<h2 id="explicación-teórica">Explicación teórica</h2>
+
+<p>Ya comentábamos en un post anterior que una de las precauciones que había que tener al utilizar contenedores Docker o de cualquier otro tipo, era a la hora de montar volúmenes.</p>
+
+<p>En este caso veremos otra precacución a tener en cuenta, el hecho de montar el socket de Docker en el anfitrión <code class="language-plaintext highlighter-rouge">/var/run/socker.dock</code> directamente en el contenedor.</p>
+
+<h3 id="qué-es-dockersock">¿Qué es <code class="language-plaintext highlighter-rouge">docker.sock</code>?</h3>
+
+<p>Docker es un servicio que corre en la máquina anfitrión. Este servicio se comunica con los clientes mediante un socket. Dicho de otra forma, la linea de comandos de Docker (docker-cli) utiliza sockets para comunicarse con el demonio de Docker.</p>
+
+<p>Así pues, el demonio de Docker (dockerd) escucha peticiones a través de la API de Docker y de esta forma maneja objetos Docker tales como imágenes, contenedores, redes y volúmenes.</p>
+
+<p>Este demonio ( o Docker Engine en alguna literartura) soporta 3 tipos de sockets: <code class="language-plaintext highlighter-rouge">unix</code>, <code class="language-plaintext highlighter-rouge">tcp</code> y <code class="language-plaintext highlighter-rouge">fd</code>. Por temas de seguridad, por defecto utiliza el tipo <code class="language-plaintext highlighter-rouge">unix</code>.</p>
+
+<p>Si quisiéramos poder hacer llamadas a la API a través de la red porque nuestro diseño así lo exige, utilizaríamos el socket de tipo <code class="language-plaintext highlighter-rouge">tcp</code> y es aquí cuando tendríamos un riesgo de seguridad. El propietario de <code class="language-plaintext highlighter-rouge">/var/run/docker.sock</code> es <code class="language-plaintext highlighter-rouge">root</code>, por lo que si se tiene acceso a este socket desde el contenedor comprometiéndolo, al haberlo montado como volúmen, tenemos un riesgo potencial de que alguien tenga acceso root a nuestra máquina anfitrión, es decir, una escalada de privilegios escapando del contenedor.</p>
+
+<p>Una prueba sencilla de que este socket está en funcionamiento podríamos realizarla corriendo un contenedor y luego consultando la información de dicho contenedor con curl:</p>
+
+<p><img src="../img/dockerII/alpine1.png" alt="" /></p>
+
+<p>Esta consulta a la API equivaldría a un <code class="language-plaintext highlighter-rouge">docker ps -a</code> en docker-cli:</p>
+
+<p><img src="../img/dockerII/API1.png" alt="" /></p>
+
+<h3 id="por-qué-querría-montar-el-socket-en-el-contenedor">¿Por qué querría montar el socket en el contenedor?</h3>
+
+<p>Cuando uno intenta documentarse sobre este asunto, lo que leerá el 90% de las ocasiones será <strong>¡¡No montes /docker/run/docker.sock en tu contenedor!!</strong>. Sin duda una solución estupenda que elimina todo riesgo al respecto.</p>
+
+<p>Ahora bien, podemos encontrarnos que se ha montado el socket en el contenedor por diversos motivos, como por ejemplo:</p>
+
+<ul>
+  <li>Los desarrolladores lo dejan montado para depurar sus aplicaciones leyendo los logs de dentro del contenedor</li>
+  <li>Queremos que una aplicación como <a href="https://onthedock.github.io/post/170429-portainer-para-gestionar-tus-contenedores-en-docker/">Portainer</a> pueda crear contenedores</li>
+  <li>Queremos poder crear y lanzar contenedores desde dentro de otro contenedor. Un ejemplo sería un contenedor con un pipeline de Jenkins que construya y lance imágenes Docker</li>
+</ul>
+
+<h2 id="caso-práctico">Caso práctico</h2>
+
+<p>La idea subyacente para esta escalada de privilegios es bastante simple. Puesto que el contenedor que teóricamente hemos comprometido corre con el usuario root dentro del contenedor, que a su vez se corresponde con el usuario root del sistema anfitrión, podremos crear y correr un nuevo contenedor que monte como volumen el sistema raíz del anfitrión. Y esto nos llevaría al anterior caso que ya discutimos en el blog de escalada de privilegios en Docker, ya que tendríamos acceso por completo al sistema anfitrión.</p>
+
+<p>Como una imagen vale más que mil palabras, vamos a ello. Creamos un contenedor con una imagen de Alpine que monte como volumen <code class="language-plaintext highlighter-rouge">/var/run/docker.sock</code> y comprobamos que se ha montado bien:</p>
+
+<p><img src="../img/dockerII/alpine2.png" alt="" /></p>
+
+<p>Y se nos ofrece información sobre los contenedores. Esta consulta es equivalente a realizar un <code class="language-plaintext highlighter-rouge">docker ps -a</code>:</p>
+
+<p><img src="../img/dockerII/contenedores1.png" alt="" /></p>
+
+<p>Una vez dentro del contenedor comprometido, que está ejecutándose con el usuario root por defecto, descargamos <code class="language-plaintext highlighter-rouge">docker-cli</code>:</p>
+
+<p><img src="../img/dockerII/alpine3.png" alt="" /></p>
+
+<p>En nuestro sistema anfitrión hemos creado un simple archivo de texto para comprobar que conseguimos escapar desde el contenedor y acceder al sistema de archivos del anfitrión, así como modificarlo:</p>
+
+<p><img src="../img/dockerII/alpine4.png" alt="" /></p>
+
+<p>Así pues, contando ya con <code class="language-plaintext highlighter-rouge">docker-cli</code> en el contenedor, lanzamos un nuevo contenedor que monte como volumen el directorio raíz <code class="language-plaintext highlighter-rouge">/</code> del sistema en el directorio <code class="language-plaintext highlighter-rouge">owned</code> del contenedor:</p>
+
+<p><img src="../img/dockerII/alpine5.png" alt="" /></p>
+
+<p>Y vemos que hemos conseguido escapar del contendor hacia sl sistema de archivos del anfitrión y además con acceso root, puesto que el root del contenedor se mapea con un usuario que pertenece al grupo docker y que, por tanto, tiene privilegios de root como vismo en el anterior post.</p>
+
+<p><img src="../img/dockerII/alpine6.png" alt="" /></p>
+
+<p>Si por lo que fuera no pudiéramos instalar <code class="language-plaintext highlighter-rouge">docker-cli</code> en el contenedor, podríamos realizar el mismo proceso mediante llamadas a la API usando <code class="language-plaintext highlighter-rouge">curl</code>.</p>
+
+<p>Primero consultamos los contenedores corriendo en el sistema (equivalente a <code class="language-plaintext highlighter-rouge">docker ps</code>), posteriormente, utilizando JSON, creamos un nuevo contenedor de Alpine, que monte el volumen deseado, como en el caso anterior cuando utilizamos <code class="language-plaintext highlighter-rouge">docker-cli</code>.</p>
+
+<p><img src="../img/dockerII/alpine7.png" alt="" /></p>
+
+<p>Y lo iniciamos:</p>
+
+<p><img src="../img/dockerII/alpine8.png" alt="" /></p>
+
+<p>Como hemos hecho un <code class="language-plaintext highlighter-rouge">chroot /owned</code>, tenemos acceso a los binarios del sistema. Podemos utilizar socat  para comunicarnos con el socket de Docker, <em>“secuestrando”</em> la conexión http para transportar la información de stdin/stdout/stderr:</p>
+
+<p><img src="../img/dockerII/alpine10.png" alt="" /></p>
+
+<p>Y vemos que conseguimos escapar del contenedor al sistema de archivos del sistema anfitrión:</p>
+
+<p><img src="../img/dockerII/alpine11.png" alt="" /></p>
+
+<p><img src="../img/dockerII/alpine12.png" alt="" /></p>
+
+<p>Si no dispusiéramos de <code class="language-plaintext highlighter-rouge">curl</code>, podríamos haber hecho las llamadas a la API con <code class="language-plaintext highlighter-rouge">socat</code> igualmente.</p>
+
+<h2 id="mitigación">Mitigación</h2>
+
+<p>Cuando me he documentado sobre este problema, parece difícil encontrar una solución satisfactoria.</p>
+
+<ol>
+  <li>El primer consejo que uno encuentra siempre es nunca exponer o publicar el socket de Docker. De hecho, se suele leer que en el caso de tener que publicarlo, se debería replantear seriamente el diseño de la infraestructura para poder evitarlo. Si acaso, tímidamente se recomienda no exponer el socket fuera de la red interna y hacerlo en un entorno muy seguro y controlado.</li>
+</ol>
+
+<p>El argumento que se esgrime, con mucha razón, es que muchos tutoriales o guías en Internet simplemente exponen el socket sin mayor explicación sobre los riesgos de seguridad que implica, por una mayor facilidad y rapidez en el proceso. Esto hace que mucha gente publique sus sockets por seguir ciegamente algún tutorial o manual.</p>
+
+<ol>
+  <li>Retomar la solución del anterior post dedicado a la escalada de privilegios en contenedores. Esta solución consistía en remapear el usuario <code class="language-plaintext highlighter-rouge">root</code> del contenedor a un usuario sin privilegios en el namespace del sistema. En su día utilizamos este script para ese cometido:</li>
+</ol>
+
+<p><img src="../img/dockerII/remap1.png" alt="" /></p>
+
+<p>El usuario y grupo <code class="language-plaintext highlighter-rouge">dockremap</code> es el <code class="language-plaintext highlighter-rouge">default</code> para Docker, aunque podríamos hacerlo con uno diferente que creáramos para tal cometido. Este remapeo puede quedar registrado en la configuración del demonio <code class="language-plaintext highlighter-rouge">/etc/docker/daemon.json</code> de forma global o bien, hacerlo de forma concreta para un contenedor al lanzarlo mediante <code class="language-plaintext highlighter-rouge">docker-cli</code>.</p>
+
+<p>Podremos comprobar que, efectivamente, con esta solución no podemos crear contenedores nuevos desde dentro del contenedor:</p>
+
+<p><img src="../img/dockerII/userremap.png" alt="" /></p>
+
+<ol>
+  <li>Otra opción es utilizar el modo <em>rootless</em> de ejecución de Docker, tal y <a href="https://docs.docker.com/engine/security/rootless/">como está documentado en su sitio web</a>. Esto permite ejecutar tanto el demonio como los contenedores con un usuario no root.</li>
+</ol>
+
+<p>Esta opción es relativamente nueva en Docker y hasta ahora, al no existir, una posible alternativa era utilizar <strong>Podman.</strong> Podman es la implementación propia de Red Hat de su herramienta para el manejo de contenedores, completamente compatible con docker-cli y, desde hace poco, con docker-compose.</p>
+
+<p>Podman no utiliza ningún demonio y por tanto, desde su diseño inicial y por defecto, corre los contenedores sin permisos de root. No obstante, buscando opiniones de usuarios que han experimentado con él, parece que aún no está muy asentado en entornos de producción, aunque cumple sobradamente para el resto de cometidos. Además, tiene integración muy sencilla con Kubernetes.</p>
+
+<p>Ahora bien, puede haber casos en los que sea necesario publicarlo en la red. Ya hemos comentado antes del caso de Portainer, también puede darse el caso de utilizar Traefik como proxy inverso para nuestros contenedores o Jenkins para construir y correr contenedores.</p>
+
+<p><img src="../img/dockerII/traefik.png" alt="" style="height:440px;width:550px" /></p>
+
+<ol>
+  <li>
+    <p>Para estos casos, aún existen alguna posibibilidad y la misma <a href="https://docs.docker.com/engine/security/protect-access/">documentación de Docker</a> nos ofrece soluciones; utilizar TLS(HTTPS) o SSH con certiFicados para asegurar el acceso al socket</p>
+  </li>
+  <li>
+    <p>También en la <a href="https://doc.traefik.io/traefik/providers/docker/#docker-api-access">documentación</a> de Traefik se comentan soluciones y hacen referencias a múltiples discusiones al respecto en Internet con las que yo también me ido topándome al documentarme. Aparte de las previamente comentadas:</p>
+
+    <ul>
+      <li>
+        <p>Utilizar un proxy que filtre las peticiones en los accesos desde la red externa a los contenedores, de tal forma que se restrinja muy bien que tipos de llamadas se pueden realizar a la API. Por ejemplo con <a href="https://github.com/Tecnativa/docker-socket-proxy">Tecnativa</a>.</p>
+      </li>
+      <li>
+        <p>También se puede utilizar Nginx de <a href="https://github.com/nginx-proxy/nginx-proxy/blob/main/README.md#separate-containers">esta</a>] forma como proxy inverso, con dos contenedores diferentes, de tal forma que se expone el socket de Docker pero en un contenedor únicamente con acceso local.</p>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <p>Utilizar un plugin de Docker para autorizar accesos. Explicado <a href="https://docs.docker.com/engine/extend/plugins_authorization/">aquí</a> en su documentación.</p>
+  </li>
+  <li>
+    <p>Utilizar métodos de protección a nivel de Kernel como SELinux o Apparmor.</p>
+  </li>
+</ol>
+
+<p>Sea como fuera, si por razones de diseño impepinables se debe exponer el socket y es imposible un rediseño que lo impida, existen ciertas soluciones que se han explicado y que habría que estudiar para cada caso concreto.</p>
+
+<p>Destacar que esta preocupación, a pesar de ser algo bastante importante, no está ni mucho menos extendida en gran medida y es por ello que estas soluciones son muy recientes en el tiempo a la hora de escribir este post.</p>
+
+<h2 id="referencias">Referencias</h2>
+
+<p><a href="https://blog.quarkslab.com/why-is-exposing-the-docker-socket-a-really-bad-idea.html">1</a>
+<a href="https://greencashew.dev/posts/docker-container-breakout-using-docker.sock/">2</a>
+<a href="https://news.ycombinator.com/item?id=17983623">3</a>
+<a href="https://news.ycombinator.com/item?id=24568973">4</a>
+<a href="https://integratedcode.us/2016/04/20/sharing-the-docker-unix-socket-with-unprivileged-containers-redux/">5</a>
+<a href="https://www.practical-devsecops.com/lesson-4-hacking-containers-like-a-boss/">6</a>
+<a href="">7</a></p>
+
+:ET

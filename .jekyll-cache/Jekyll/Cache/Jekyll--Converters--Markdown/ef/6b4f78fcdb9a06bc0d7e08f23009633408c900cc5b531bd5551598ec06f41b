@@ -1,0 +1,186 @@
+I"�,<h2 id="explicación-teórica">Explicación teórica</h2>
+
+<h3 id="qué-es-json">¿Qué es JSON?</h3>
+<p>JSON es el acrónimo de JavaScript Object Notation y es un formato basado en texto para transmitir información entre aplicaciones web. Almacena la información de una forma tal que hace muy fácil el acceder a ella, tanto para desarrolladores como para las máquinas.</p>
+
+<p>También puede ser usado como formato de datos por cualquier lenguaje de programación y de heco se está convirtiendo rápidamente en la sintaxis preferida para las APIs, superando a XML.</p>
+
+<h3 id="qué-es-un-json-web-token-jwt">¿Qué es un JSON Web Token (JWT)?</h3>
+
+<p>JWT es ya una técnica muy popular para securizar APIs, así como ha conseguido (y sigue haciéndolo) gran popularidad también en muchos CTF.</p>
+
+<p>En esencia, JWT es un estándar abierto utiliziado para compartir información entre dos partes, cliente y servidor. Cada JWT incluye objetos JSON codificados. Los JWT se firman utilzando algoritmos criptográficos con el fin de asegurar que no han sido modificados una vez han sido emitidos.</p>
+
+<p>Dos de sus grandes ventajas son:</p>
+
+<ul>
+  <li><strong>Compactos:</strong> debido a su tamaño, se pueden enviar en una URL, como un parámetro POST o dentro de una cabecera HTTP. Además, este reducido tamaño hace que la transmisión sea más rápida.</li>
+  <li><strong>Autocontenidos:</strong> el “payload” contiene toda la información que se necesita del usuario, evitando así consultar a la base de datos más de una vez.</li>
+</ul>
+
+<h3 id="cuándo-usar-jwts">¿Cuándo usar JWTs?</h3>
+
+<p>Hay dos escenarios donde este tipo de token es útil:</p>
+
+<ul>
+  <li>
+    <p><strong>Autenticación:</strong> Es el escnario típico en el que se usan los JWTs. Una vez logueado, cada petición a partir de ese momento irá acompañada del JWT, permitiendo el acceso a las rutas, servicios y recursos que correspondan a ese token.</p>
+  </li>
+  <li>
+    <p><strong>Intercambio de información:</strong> Los JWTs son una buena forma de transmitir información de forma segura entre las partes porque estos tokens pueden firmarse, por ejemplo con claves pública/privada. Esto también permite aseugrar la integridad puesto que la firma se calcula usando la información del token, el header y el payload, que veremos a continuación.</p>
+  </li>
+</ul>
+
+<h3 id="estructura-de-un-jwt">Estructura de un JWT</h3>
+
+<p>Un JWT está formado por tres partes separadas por un punto entre ellas. Estas partes se conocen como:</p>
+<ul>
+  <li>Header</li>
+  <li>Payload</li>
+  <li>Signature</li>
+</ul>
+
+<p>Por lo que el formato típico de un JWT sería: <code class="language-plaintext highlighter-rouge">xxxxxxx.yyyyyyy.zzzzzzz</code></p>
+
+<p><img src="../img/jwt/jwt-structure.webp" alt="" /></p>
+
+<h4 id="header">Header</h4>
+<p>En header típicamente tiene dos partes: el tipo de token <code class="language-plaintext highlighter-rouge">typ</code> y el algoritmo de firma utilizado <code class="language-plaintext highlighter-rouge">alg</code>.</p>
+
+<p>Se pueden utilizar multitud de algoritmos pero los más conocidos son:</p>
+
+<ul>
+  <li>
+    <p><strong>HS256:</strong> Simétrico, es decir, utiliza el mismo secret para firmar que para verificar. Más rápido ya que el procesado es más sencillo y el token resultante más pequeño.</p>
+  </li>
+  <li>
+    <p><strong>RS256:</strong> Asimétrico (par de claves pública/privada). La clave privada se utiliza en el firmado y la pública para verificar la firma.</p>
+  </li>
+</ul>
+
+<p>Por último, este JSON se codificada en formato <code class="language-plaintext highlighter-rouge">Base64Url</code></p>
+
+<h4 id="payload">Payload</h4>
+<p>La segunda parte del token es el payload, que contiene los conocidos como <code class="language-plaintext highlighter-rouge">claims</code>. Estos <code class="language-plaintext highlighter-rouge">claims</code> hacen referencia, por norma general, a datos del usuario y metadatos adicionales. Pueden ser de tres tipos:</p>
+
+<ul>
+  <li><strong>Reserved:</strong> Son claims predefinidos, que si bien no son obligatorios, son bastante recomendados.</li>
+  <li><strong>Public:</strong> Se pueden definir a voluntad por aquellos que usen los JWTs. No obstante, para evitar colisiones, se deben definiar en la IANA JSON Web TOken Registry.</li>
+  <li><strong>Private:</strong> Son claims customizados creados con el fin de compartir información entre las partes que han acordado utilizarlos.</li>
+</ul>
+
+<p>El payload, como veíamos en la imagen de arriba, también se codifica en <code class="language-plaintext highlighter-rouge">Base64Url</code>.</p>
+
+<h4 id="signature">Signature</h4>
+
+<p>Para la firma, se utiliza la parte codificada del header, la parte codificada del payload, un <code class="language-plaintext highlighter-rouge">secret</code> y el algoritmo especificado en el header. Un ejemplo de esto en pseudocódigo sería:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>HMACSHA256(
+  base64UrlEncode(header) + "." +
+  base64UrlEncode(payload),
+  secret)
+</code></pre></div></div>
+
+<p><strong>Atención</strong></p>
+
+<p>Firmar el token asegura su integridad, es decir, nos certifica que la información que contiene no ha sido modificada. No obstante, este token está codificado, que no cifrado, por lo que cualquier información que contenga podrá ser visualizada sin problemas.</p>
+
+<p>Para asegurar la confidencialidad de los datos, se recomienda utilizar cifrado, como por ejemplo HTTPS entre los participantes de la conversación.</p>
+
+<h2 id="caso-práctico">Caso práctico</h2>
+
+<p>Vamos a ver algunos casos de mala utilización de los JWTs y de qué manera pueden ser “abusados”. Para ello vamos a utilizar <a href="https://jwt-lab.herokuapp.com/challenges">un estupendo laboratorio</a> que alguien ha tenido a bien montar para que cualquiera pueda usarlo. En este laboratorio hay una serie de <a href="https://jwt-lab.herokuapp.com/challenges">challenges</a> a realizar. Veamos algunos de ellos.</p>
+
+<h3 id="vulnerabilidad-none-algorithm-">Vulnerabilidad “none algorithm “</h3>
+
+<p>JWT permite utilizar para el claim <code class="language-plaintext highlighter-rouge">alg</code> el valor <code class="language-plaintext highlighter-rouge">none</code>. Es decir, si sustituimos el algoritmo de firma que se esté utilizando por el valor none y dejamos el campo <code class="language-plaintext highlighter-rouge">signature</code> vacío, el token será considerado como correcto y podremos suplantar a otros usuarios.</p>
+
+<p>Veamos cómo proceder.</p>
+
+<ol>
+  <li>
+    <p>En primer lugar registraremos un nuevo usuario que será el que utilicemos para todas nuestras subsiguientes pruebas. Si accedemos al link: https://jwt-lab.herokuapp.com/users/new y rellenamos los datos, tendremos listo nuestro usuario:
+  <img src="../img/jwt/jwt1.png" alt="" /></p>
+  </li>
+  <li>
+    <p>Tras ello, nos dirigimos a la URL para este challenge: https://jwt-lab.herokuapp.com/authentication/none y nos logueamos con el usuario que acabamos de crear
+<img src="../img/jwt/jwt2.png" alt="" /></p>
+  </li>
+  <li>
+    <p>Si examinamos las peticiones y respuestas del proceso de login, veremos que tal y como dicta la teoría, tras realizarse el proceso de login, se genera y se devuelve un JWT al cliente:
+<img src="../img/jwt/jwt3.png" alt="" /></p>
+
+    <p>Que es el que el cliente efectivamente utiliza a partir de ese momento en sus peticiones:
+   <img src="../img/jwt/jwt4.png" alt="" /></p>
+  </li>
+  <li>
+    <p>Vamos a ver como sería este token decodificado. Envíamos la petición al <em>repeater</em> de Burp y el token al plugin <strong>JSON Web Tokens</strong>:
+<img src="../img/jwt/jwt5.png" alt="" /></p>
+
+    <p>Y de esta forma podemos observar el algoritmo que se está utilizando para la firma en el Header y el nombre el usuario en el Payload, así como la firma en la parte del Signature.
+   <img src="../img/jwt/jwt6.png" alt="" /></p>
+  </li>
+  <li>
+    <p>Si ahora, utilizando el plugin previamente mencionado, le decimos que vamos a realizar un <code class="language-plaintext highlighter-rouge">Alg None attack</code> y además, le decimos que vamos a suplantar al usuario <code class="language-plaintext highlighter-rouge">admin</code>, dejando además el campo Signature vacío:
+<img src="../img/jwt/jwt7.png" alt="" /></p>
+
+    <p>Y reenviamos esta petición:
+<img src="../img/jwt/jwt8.png" alt="" /></p>
+
+    <p>Hemos conseguido convertirnos en <code class="language-plaintext highlighter-rouge">admin</code>, puesto que al admitirse el valor <em>none</em> para <em>alg</em>, este token se considera válido y nos identifica de forma correcta.</p>
+  </li>
+</ol>
+
+<h2 id="no-se-comprueba-el-signature">No se comprueba el “signature”</h2>
+
+<p>Un gran fallo de seguridad al utilizar JWT es que no se comprueba el valor del <code class="language-plaintext highlighter-rouge">signature</code> cuando se recibe en el servidor. Así pues, un usuario malintencionado podría utilizar un signature inválido y hacer pasar el token por válido para, de esta forma, suplantar a otro usuario.</p>
+
+<p>Veamos cómo proceder:</p>
+
+<ol>
+  <li>
+    <p>Identificamos la petición inicial correcta, con la firma correspondiente y el usuario original <code class="language-plaintext highlighter-rouge">raul-jwt</code>
+ <img src="../img/jwt/jwt15.png" alt="" /></p>
+  </li>
+  <li>
+    <p>Si eliminamos la firma y le decimos que queremos suplantar la identidad del usuario <code class="language-plaintext highlighter-rouge">admin</code>, al no comprobarse la firma, tendremos éxito en nuestros maliciosas intenciones:
+   <img src="../img/jwt/jwt16.png" alt="" /></p>
+  </li>
+</ol>
+
+<h2 id="el-valor-del-signature-no-es-lo-suficientemente-robusto">El valor del “signature” no es lo suficientemente robusto</h2>
+<p>Si el valor utilizado para la firma no es lo suficientemente robusto, podría ser susceptible a ataques de fuerza bruta. Veamos la demostración:</p>
+
+<ol>
+  <li>
+    <p>En primer lugar accedemos a la URL para este challenge: https://jwt-lab.herokuapp.com/authentication/signature y nos logueamos con nuestro usuario.
+<img src="../img/jwt/jwt11.png" alt="" /></p>
+  </li>
+  <li>
+    <p>Volvemos a identificar el nuevo token:
+ <img src="../img/jwt/jwt12.png" alt="" /></p>
+  </li>
+  <li>
+    <p>Con la ayuda de hashcat el diccionario rockyou.txt, crackeamos el valor del secreto utilizdo para generar la firma:
+ <img src="../img/jwt/jwt13.png" alt="" /></p>
+  </li>
+  <li>
+    <p>Y comprobamos que haciendo uso de este valor crackeado podemos convertirnos en el usuario admin, recalculando el valor de la firma:
+ <img src="../img/jwt/jwt14.png" alt="" /></p>
+  </li>
+</ol>
+
+<p>Y, por si alguien estuviera interesado, existen algunos challenges más en el laboratorio, así como los <a href="https://adamc95.medium.com/json-web-token-lab-guide-c402857fa44c">walkthroughs</a> correspondientes en la página del autor.</p>
+
+<h2 id="referencias">Referencias:</h2>
+
+<p><a href="https://sh3llcon.org/jwt-for-beginners/">Shellcon</a></p>
+
+<p><a href="https://auth0.com/learn/json-web-tokens/">Auth0</a></p>
+
+<p><a href="https://www.akana.com/blog/what-is-jwt">Akana</a></p>
+
+<p><a href="https://blog.miniorange.com/what-is-jwt-json-web-token-how-does-jwt-authentication-work/">Miniorange</a></p>
+
+<p><a href="https://adamc95.medium.com/json-web-token-lab-guide-c402857fa44c">Challenges walkthroughs</a></p>
+:ET

@@ -1,0 +1,46 @@
+I"]<h2 id="explicación-teórica">Explicación teórica</h2>
+
+<p>Supongamos que hemos vulnerado una máquina Windows y que tenemos una shell de usuario raso.</p>
+
+<p>Decididmos estudiar los posibles métodos de escalada de privilegios haciendo uso de <a href="https://github.com/BloodHoundAD/BloodHound">Bloodhound</a> para enumerar el dominio, sus objetos y propiedades.</p>
+
+<p>Descubrimos que existe una GPO que podemos modificar porque tenemos permiso de escritura sobre ella. Veremos como hacerlo para incluir a nuestro usuario en el grupo de administradores.</p>
+
+<h2 id="caso-práctico">Caso práctico</h2>
+
+<p>Como ya hemos dicho, mediante el ingestor adecuado, obtenemos el zip con la información que importaremos en Bloodhound. Tras utilizar una query predefinida para obtener el camino más corto hacia el Domain Admin, obtenemos:</p>
+
+<p><img src="../img/GPOAbuse/vulnnet0.png" alt="" /></p>
+
+<p>Es decir, la cuenta con la que hemos obtenido acceso a la máquina, <em><code class="language-plaintext highlighter-rouge">enterprise-security</code></em>, tiene permisos de escritura sobre la GPO <em><code class="language-plaintext highlighter-rouge">security-pol-vn</code></em>, dentro del dominio <em><code class="language-plaintext highlighter-rouge">vulnnet.local</code></em>, que contiene al usuario <em><code class="language-plaintext highlighter-rouge">Administrator</code></em> y al grupo <em><code class="language-plaintext highlighter-rouge">Administrators</code></em></p>
+
+<p>Es decir, debemos hacer uso de esta GPO o “abusar” de ella mediante la herramienta adecuada. Para este cometido tentemos <a href="https://github.com/FSecureLABS/SharpGPOAbuse">SharpGPOAbuse</a>. En teoría, es necesario compilar el código de esta aplicación para obtener el ejecutable:</p>
+
+<p><code class="language-plaintext highlighter-rouge">SharpGPOAbuse has been built against .NET 3.5 and is compatible with Visual Studio 2017.</code></p>
+
+<p>No obstante, es posible encontrar alguna versión precompilada, como por ejemplo <a href="https://github.com/byronkg/SharpGPOAbuse">aquí</a></p>
+
+<h3 id="transferencia-de-sharpgpoabuseexe-a-la-máqjuina-víctima">Transferencia de SharpGPOAbuse.exe a la máqjuina víctima</h3>
+
+<p>Tras obtener nuestra shell inversa mediante cualquier método, procederemos a transmitir este ejecutable desde nuestra máquina atacante a nuestra máquina víctima.</p>
+
+<p>Tras ello, se comprueba la información de la cuenta de usuario comprometida:</p>
+
+<p><img src="../img/GPOAbuse/vulnnet.png" alt="" /></p>
+
+<p>Notar que el usuario sólo pertenece al grupo de usuarios de dominio (Domain Users)</p>
+
+<h3 id="uso-y-sintaxis-de-sharpgpoabuseexe">Uso y sintaxis de SharpGPOAbuse.exe</h3>
+
+<p>Siguiendo la sintaxis que se nos indica en su github, hacemos uso de esta aplicación para añadir una nueva tarea al dominio, ejecutada por el administrador y que consiste en añadir el usuario omprometido al grupo de administradores mediante la GPO susceptible de ser abusada.</p>
+
+<p><img src="../img/GPOAbuse/vulnnet2.png" alt="" /></p>
+
+<p>También forzamos la actualización de las políticas.</p>
+
+<p>Y si comprobamos ahora la información de la cuenta de usuario, vemos que pertenecemos al grupo <code class="language-plaintext highlighter-rouge">Administrators</code>, ergo somos administradores del dominio.</p>
+
+<p><img src="../img/GPOAbuse/vulnnet3.png" alt="" /></p>
+
+<p>Por lo que podemos conectarnos de forma remota con este usuario y con <code class="language-plaintext highlighter-rouge">psexec</code> y comprobar que, efectivamente, nuestra cuenta es <code class="language-plaintext highlighter-rouge">nt authority\system</code></p>
+:ET
