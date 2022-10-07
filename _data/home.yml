@@ -11,6 +11,9 @@ navbar_entries:
   - title: Despliegue de aplicaciones web 
     url:  http://raul-profesor.github.io/DEAW
 
+  - title: Python para ciberseguridad 
+    url:  http://raul-profesor.github.io/Python-ciber
+
   - title: About
     url: about
 
