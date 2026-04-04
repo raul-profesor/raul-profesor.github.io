@@ -1,0 +1,117 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+const posts = await getCollection('blog');
+const sortedPosts = posts.sort((a, b) => {
+	const aDate = a.data.pubDate || new Date(a.id.split('-').slice(0, 3).join('-'));
+	const bDate = b.data.pubDate || new Date(b.id.split('-').slice(0, 3).join('-'));
+	return bDate.getTime() - aDate.getTime();
+});
+
+function formatDate(date: Date) {
+	return date.toLocaleDateString('es-ES', {
+		year: 'numeric',
+		month: 'long',
+		day: 'numeric'
+	});
+}
+---
+
+<Layout title="Blog | Raúl Riesco">
+	<div class="blog-header">
+		<a href="/" class="back-link">&larr; Volver al Dashboard</a>
+		<h1>Explorando la <span class="text-gradient">Ciberseguridad</span></h1>
+		<p class="subtitle">Artículos sobre seguridad, redes y desarrollo web.</p>
+	</div>
+
+	<div class="posts-list">
+		{sortedPosts.map((post) => (
+			<article class="post-card">
+				<a href={`/blog/${post.slug}`} class="post-link">
+					<div class="post-meta">
+						{formatDate(post.data.pubDate || new Date(post.id.split('-').slice(0, 3).join('-')))}
+					</div>
+					<h2 class="post-title">{post.data.title}</h2>
+					<p class="post-description">{post.data.description || 'Haga clic para leer el artículo completo...'}</p>
+					<div class="read-more">Leer más &rarr;</div>
+				</a>
+			</article>
+		))}
+	</div>
+</Layout>
+
+<style>
+	.blog-header {
+		margin: 4rem 0 6rem 0;
+	}
+	.back-link {
+		display: inline-block;
+		margin-bottom: 2rem;
+		color: var(--accent-light);
+		font-weight: 500;
+		transition: transform 0.2s ease;
+	}
+	.back-link:hover {
+		transform: translateX(-5px);
+	}
+	h1 {
+		font-size: 3.5rem;
+		margin-bottom: 0.5rem;
+	}
+	.text-gradient {
+		background: linear-gradient(45deg, #a855f7, #6366f1);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+	}
+	.subtitle {
+		font-size: 1.25rem;
+		color: var(--text-muted);
+	}
+	.posts-list {
+		display: flex;
+		flex-direction: column;
+		gap: 2rem;
+		max-width: 800px;
+		margin: 0 auto 4rem auto;
+	}
+	.post-card {
+		background: rgba(30, 41, 59, 0.4);
+		backdrop-filter: blur(8px);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: 1rem;
+		transition: all 0.3s ease;
+	}
+	.post-card:hover {
+		transform: scale(1.01);
+		background: rgba(30, 41, 59, 0.5);
+		border-color: rgba(255, 255, 255, 0.2);
+	}
+	.post-link {
+		display: block;
+		padding: 2rem;
+		text-decoration: none;
+		color: white;
+	}
+	.post-meta {
+		font-size: 0.875rem;
+		color: var(--accent-light);
+		margin-bottom: 0.5rem;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+	}
+	.post-title {
+		font-size: 1.75rem;
+		margin: 0.5rem 0 1rem 0;
+		line-height: 1.2;
+	}
+	.post-description {
+		color: var(--text-muted);
+		line-height: 1.6;
+		margin-bottom: 1.5rem;
+	}
+	.read-more {
+		font-weight: 600;
+		color: var(--accent-light);
+	}
+</style>

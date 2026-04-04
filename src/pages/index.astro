@@ -1,0 +1,78 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Card from '../components/Card.astro';
+import links from '../data/links.json';
+import * as Icons from 'lucide-astro';
+
+const featuredLinks = links;
+---
+
+<Layout title="Dashboard de Recursos | Raúl Riesco">
+	<div class="hero">
+		<h1>Recursos y <span class="text-gradient">Materiales</span></h1>
+		<p class="subtitle">Dashboard personal con accesos directos a materiales creados para los módulos que he impartido.</p>
+	</div>
+
+	<div class="grid">
+		{featuredLinks.map((link) => (
+			<Card 
+				title={link.title} 
+				url={link.url} 
+				icon={link.icon} 
+				status={link.status as any}
+				color={(link as any).color}
+			/>
+		))}
+	</div>
+
+	<footer class="home-footer">
+		<p>&copy; {new Date().getFullYear()} Raúl Riesco - Desarrollado con Astro</p>
+	</footer>
+</Layout>
+
+<style>
+	.hero {
+		text-align: center;
+		margin: 4rem 0 6rem 0;
+	}
+	h1 {
+		font-size: 4rem;
+		margin-bottom: 0.5rem;
+		background: linear-gradient(to right, #f8fafc, #94a3b8);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+	}
+	.text-gradient {
+		background: linear-gradient(45deg, #a855f7, #6366f1);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+	}
+	.subtitle {
+		font-size: 1.25rem;
+		color: var(--text-muted);
+		max-width: 600px;
+		margin: 0 auto;
+	}
+	.grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+		gap: 1.5rem;
+		margin-bottom: 4rem;
+	}
+	.home-footer {
+		text-align: center;
+		padding: 4rem 0;
+		border-top: 1px solid rgba(255, 255, 255, 0.1);
+		color: var(--text-muted);
+		font-size: 0.875rem;
+	}
+
+	@media (max-width: 768px) {
+		h1 {
+			font-size: 2.5rem;
+		}
+		.grid {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>

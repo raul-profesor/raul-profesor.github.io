@@ -1,0 +1,44 @@
+[
+  {
+    "title": "Blog",
+    "url": "/blog",
+    "icon": "book",
+    "status": "old"
+  },
+  {
+    "title": "Planificación y administración de redes",
+    "url": "http://raul-profesor.github.io/PARE",
+    "icon": "network",
+    "status": "new"
+  },
+  {
+    "title": "Servicis en xarxa i Internet",
+    "url": "http://raul-profesor.github.io/SXI",
+    "icon": "globe",
+    "status": "deprecated"
+  },
+  {
+    "title": "Curso especialista ciberseguridad",
+    "url": "http://raul-profesor.github.io/Curso-especialista-ciberseguridad/section",
+    "icon": "shield-check",
+    "status": "old"
+  },
+  {
+    "title": "Despliegue de aplicaciones web",
+    "url": "http://raul-profesor.github.io/Despliegue",
+    "icon": "server",
+    "status": "new"
+  },
+  {
+    "title": "Seguretat i alta disponibilitat",
+    "url": "http://raul-profesor.github.io/SAD",
+    "icon": "lock",
+    "status": "new"
+  },
+  {
+    "title": "Python para ciberseguridad",
+    "url": "http://raul-profesor.github.io/Python-ciber",
+    "icon": "code",
+    "status": "old"
+  }
+]

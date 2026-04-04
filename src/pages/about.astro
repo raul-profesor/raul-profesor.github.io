@@ -1,0 +1,48 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Sobre el Proyecto | Raúl Riesco">
+	<article class="static-page">
+		<a href="/" class="back-link">&larr; Volver al Dashboard</a>
+		<h1>About / <span class="text-gradient">Sobre mí</span></h1>
+		
+		<div class="content">
+			<p>Portal per a accedir als materials dels diferents mòduls.</p>
+			<p>Portal para acceder a los materiales de los diferentes módulos.</p>
+		</div>
+	</article>
+</Layout>
+
+<style>
+	.static-page {
+		max-width: 800px;
+		margin: 4rem auto;
+		background: rgba(30, 41, 59, 0.3);
+		backdrop-filter: blur(12px);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: 1.5rem;
+		padding: 3rem;
+	}
+	.back-link {
+		color: var(--accent-light);
+		text-decoration: none;
+		font-weight: 500;
+		display: inline-block;
+		margin-bottom: 2rem;
+	}
+	h1 {
+		font-size: 3rem;
+		margin-bottom: 2rem;
+	}
+	.text-gradient {
+		background: linear-gradient(45deg, #a855f7, #6366f1);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+	}
+	.content {
+		font-size: 1.2rem;
+		line-height: 1.8;
+		color: #e2e8f0;
+	}
+</style>

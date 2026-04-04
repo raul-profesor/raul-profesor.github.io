@@ -1,0 +1,102 @@
+---
+import Layout from '../layouts/Layout.astro';
+import * as Icons from 'lucide-astro';
+---
+
+<Layout title="Contacto | Raúl Riesco">
+	<article class="static-page">
+		<a href="/" class="back-link">&larr; Volver al Dashboard</a>
+		<h1>Contacto / <span class="text-gradient">Contact</span></h1>
+		
+		<div class="contact-card">
+			<div class="contact-info">
+				<div class="icon-box">
+					<Icons.Mail size={32} />
+				</div>
+				<div>
+					<p class="label">Correo Electrónico</p>
+					<a href="mailto:r.riesco@edu.gva.es" class="email-link">r.riesco@edu.gva.es</a>
+				</div>
+			</div>
+			
+			<div class="message">
+				<p>Per a contactar-me, podeu utilitzar el correu anterior.</p>
+				<p>Para contactarme podéis utilizar el correo anterior.</p>
+			</div>
+		</div>
+	</article>
+</Layout>
+
+<style>
+	.static-page {
+		max-width: 800px;
+		margin: 4rem auto;
+		background: rgba(30, 41, 59, 0.3);
+		backdrop-filter: blur(12px);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: 1.5rem;
+		padding: 3rem;
+	}
+	.back-link {
+		color: var(--accent-light);
+		text-decoration: none;
+		font-weight: 500;
+		display: inline-block;
+		margin-bottom: 2rem;
+	}
+	h1 {
+		font-size: 3rem;
+		margin-bottom: 3rem;
+	}
+	.text-gradient {
+		background: linear-gradient(45deg, #a855f7, #6366f1);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+	}
+	.contact-card {
+		background: rgba(15, 23, 42, 0.4);
+		border-radius: 1rem;
+		padding: 2rem;
+		border: 1px solid rgba(255, 255, 255, 0.05);
+	}
+	.contact-info {
+		display: flex;
+		align-items: center;
+		gap: 1.5rem;
+		margin-bottom: 2rem;
+	}
+	.icon-box {
+		width: 4rem;
+		height: 4rem;
+		background: rgba(136, 58, 234, 0.2);
+		border-radius: 1rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: var(--accent-light);
+	}
+	.label {
+		color: var(--text-muted);
+		font-size: 0.9rem;
+		margin: 0;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+	}
+	.email-link {
+		font-size: 1.5rem;
+		font-weight: 600;
+		color: white;
+		text-decoration: none;
+		transition: color 0.2s;
+	}
+	.email-link:hover {
+		color: var(--accent-light);
+	}
+	.message {
+		font-size: 1.1rem;
+		line-height: 1.6;
+		color: #cbd5e1;
+		border-top: 1px solid rgba(255, 255, 255, 0.1);
+		padding-top: 1.5rem;
+	}
+</style>
